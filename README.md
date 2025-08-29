@@ -1,6 +1,6 @@
 # Move My Car (self-hosted, privacy-friendly)
 
-English documentation. For Chinese, see: readme_zh.md
+[中文文档 / Chinese README](readme_zh.md)
 
 An open-source, self-hosted “move my car” QR code tool. It lets visitors contact the car owner anonymously without exposing a phone number. The MVP focuses on: code management, anonymous messages (text + image), lightweight notifications, basic abuse protection, and printable/online QR codes.
 

@@ -2,7 +2,7 @@
 
 一个开源、可自部署、隐私友好的“公共挪车码”工具。面向个人/社区，无需暴露手机号即可与车主建立匿名联系。MVP 聚焦：挪车码管理、匿名留言（文本+图片）、轻量通知、基础防滥用、打印/电子码。
 
-> English version: see README.md
+English version: [README.md](README.md)
 
 ## 快速开始
 - Docker（推荐）
