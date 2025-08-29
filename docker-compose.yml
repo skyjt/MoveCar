@@ -1,0 +1,22 @@
+version: "3.9"
+services:
+  app:
+    image: python:3.11-slim
+    working_dir: /srv/app
+    volumes:
+      - ./:/srv/app
+      - ./data:/srv/app/data
+    environment:
+      - APP_SECRET=${APP_SECRET:-change-me}
+      - APP_BASE_URL=${APP_BASE_URL:-http://localhost:8000}
+      - DB_URL=${DB_URL:-sqlite:///data/app.db}
+      - DATA_DIR=${DATA_DIR:-./data}
+      - MAX_IMAGE_MB=${MAX_IMAGE_MB:-5}
+      - RATE_LIMIT_WINDOW=${RATE_LIMIT_WINDOW:-60}
+      - RATE_LIMIT_COUNT=${RATE_LIMIT_COUNT:-1}
+      - ANON_CHAT_ENABLED=${ANON_CHAT_ENABLED:-false}
+      - ADMIN_USERNAME=${ADMIN_USERNAME:-admin}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
+    command: bash -lc "pip install -r requirements.txt && uvicorn app.main:app --host 0.0.0.0 --port 8000"
+    ports:
+      - "8000:8000"

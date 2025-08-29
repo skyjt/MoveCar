@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>登录 - Move Car</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <meta name="color-scheme" content="light dark" />
+</head>
+<body>
+  <div class="container" style="max-width: 420px;">
+    <h1 style="margin:.2rem 0 1rem">登录</h1>
+    {% if error %}<p class="error">{{ error }}</p>{% endif %}
+    <form method="post" action="/login" class="stack">
+      <div>
+        <label>用户名</label>
+        <input name="username" placeholder="admin" required>
+      </div>
+      <div>
+        <label>密码</label>
+        <input name="password" type="password" placeholder="••••••" required>
+      </div>
+      <button type="submit" class="btn" style="width:100%">登录</button>
+    </form>
+  </div>
+</body>
+</html>

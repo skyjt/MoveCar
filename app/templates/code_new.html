@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="card">
+  <h2>新建挪车码</h2>
+  <form method="post" action="/codes" class="stack">
+    <div>
+      <label>备注/昵称（可选）</label>
+      <input name="display_name" placeholder="例如：我的白色轿车">
+    </div>
+    <p class="muted">创建后可在“打印 / 下载二维码”页面查看并下载 PNG。</p>
+    <button class="btn" type="submit">创建</button>
+  </form>
+</div>
+{% endblock %}

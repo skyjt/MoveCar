@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ title or site_title or 'Move Car 挪车码' }}</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <meta name="color-scheme" content="light dark" />
+  <link rel="icon" href="/static/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/static/icon.png">
+  {% block head %}{% endblock %}
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+  <div class="container">
+    <header class="topbar">
+      <div class="topbar__title">{{ header or 'Move Car 挪车码' }}</div>
+      <nav class="topbar__nav">
+        {% if request.session.get('user_id') %}
+          <a href="/dashboard" class="link">仪表盘</a>
+          <a href="/codes/new" class="link">新建挪车码</a>
+          <form action="/logout" method="post" class="inline">
+            <button class="btn btn--subtle" type="submit">退出</button>
+          </form>
+        {% else %}
+          <a class="btn btn--subtle" href="/login">登录</a>
+        {% endif %}
+      </nav>
+    </header>
+    {% block content %}{% endblock %}
+  </div>
+</body>
+</html>

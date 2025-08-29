@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="card" style="max-width:720px">
+  <h2>通知设置（挪车码：{{ code.display_name or code.public_code }})</h2>
+  {% if saved %}
+  <p class="muted">已保存通知设置。</p>
+  {% endif %}
+  {% if test is not none %}
+    {% if test == '1' %}
+      <p>测试通知：发送成功</p>
+    {% else %}
+      <p class="error">测试通知：发送失败（{{ test_msg }}）</p>
+    {% endif %}
+  {% endif %}
+  <form method="post" action="/codes/{{ code.id }}/notify" class="stack">
+    <div class="row">
+      <label style="margin:0 8px 0 0;">通知渠道</label>
+      <select class="select-compact" name="channel" id="channel-select" onchange="toggleChannel()">
+        <option value="NONE" {% if channel == 'NONE' %}selected{% endif %}>无</option>
+        <option value="BARK" {% if channel == 'BARK' %}selected{% endif %}>Bark</option>
+      </select>
+    </div>
+
+    <div id="bark-fields" style="display:none">
+      <label>Bark 基础 URL</label>
+      <input name="bark_base_url" value="{{ bark_base_url }}" placeholder="例如：https://api.day.app">
+      <label>Bark Token</label>
+      <input name="bark_token" value="{{ bark_token }}" placeholder="在 Bark App 中复制的设备 Token">
+      <p class="muted">参考教程：<a class="link" href="https://bark.day.app/#/tutorial" target="_blank">Bark 使用说明</a></p>
+    </div>
+
+    <div class="row">
+      <button class="btn" type="submit">保存</button>
+      <button class="btn btn--subtle" type="submit" formmethod="post" formaction="/codes/{{ code.id }}/notify/test">发送测试通知</button>
+      <a class="btn btn--ghost" href="/dashboard">返回</a>
+    </div>
+  </form>
+</div>
+
+<script>
+function toggleChannel(){
+  var sel = document.getElementById('channel-select');
+  var isBark = sel && sel.value === 'BARK';
+  document.getElementById('bark-fields').style.display = isBark ? 'block' : 'none';
+}
+toggleChannel();
+</script>
+{% endblock %}

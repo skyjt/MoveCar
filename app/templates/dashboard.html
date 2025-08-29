@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="card">
+  <h2>我的挪车码</h2>
+  <table>
+    <thead><tr><th>名称</th><th>状态</th><th>创建时间</th><th>操作</th><th>链接</th></tr></thead>
+    <tbody>
+    {% for c in codes %}
+      <tr>
+        <td>{{ c.display_name or '-' }}</td>
+        <td>{{ c.status }}</td>
+        <td class="muted">{{ c.created_at|fmt_dt }}</td>
+        <td>
+          <div class="actions">
+            <form action="/codes/{{ c.id }}/toggle" method="post" class="inline"><button class="btn btn--subtle" type="submit">切换启用</button></form>
+            <a class="btn" href="/print/{{ c.public_code }}" target="_blank">打印 / 下载二维码</a>
+            <a class="btn btn--ghost" href="/codes/{{ c.id }}/notify">通知设置</a>
+            <form action="/codes/{{ c.id }}/delete" method="post" class="inline" onsubmit="return confirm('确定删除该挪车码？相关留言将一并删除。');"><button class="btn btn--ghost" type="submit">删除</button></form>
+          </div>
+        </td>
+        <td><code>/c/{{ c.public_code }}</code><span class="muted" style="display:none" data-id="{{ c.id }}" data-public="{{ c.public_code }}"></span></td>
+      </tr>
+    {% else %}
+      <tr><td colspan="5" class="muted">暂无挪车码，去“新建挪车码”创建一个。</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- 将系统配置卡片改为与其他卡片同宽，移除窄版样式，统一视觉宽度 -->
+<div class="card">
+  <h2>系统配置</h2>
+  {% if saved %}<p class="muted">已保存配置。</p>{% endif %}
+  <form method="post" action="/settings/site" class="stack">
+    <div>
+      <label>站点标题（浏览器标签与页面标题）</label>
+      <input class="input-grow" name="site_title" value="{{ site_title or 'Move Car 挪车码' }}" placeholder="例如：Move Car 挪车码">
+    </div>
+    <div>
+      <label>网站地址（用于二维码与打印页）</label>
+      <div class="row">
+        <input class="input-grow" id="site-base-input" name="site_base_url" value="{{ site_base_url }}" placeholder="例如：https://example.com">
+        <button class="btn btn--subtle" type="button" onclick="autofillBase()">自动获取</button>
+      </div>
+      <p class="muted form-note">建议填写含协议的完整地址（含端口，如有）：例如 https://your.domain 或 http://192.168.1.10:8000</p>
+    </div>
+    <div class="row">
+      <button class="btn" type="submit">保存</button>
+    </div>
+  </form>
+</div>
+
+<script>
+function autofillBase(){
+  var el = document.getElementById('site-base-input');
+  if (!el) return;
+  try { el.value = window.location.origin; } catch(e){}
+}
+</script>
+
+<div class="card">
+  <h2>最新留言</h2>
+  <table>
+    <thead><tr><th>ID</th><th>码</th><th>内容</th><th>图片</th><th>时间</th><th>状态</th><th>操作</th></tr></thead>
+    <tbody>
+    {% for m in messages %}
+      <tr>
+        <td>{{ m.id }}</td>
+        <td>{{ m.code.display_name or m.code.public_code }}</td>
+        <td>{{ m.content_text or '-' }}</td>
+        <td>{% if m.image_path %}<a href="{{ m.image_path }}" target="_blank">查看</a>{% else %}-{% endif %}</td>
+        <td class="muted">{{ m.created_at|fmt_dt }}</td>
+        <td>{{ '已处理' if m.processed else '未处理' }}</td>
+        <td>
+          {% if not m.processed %}
+          <form action="/messages/{{ m.id }}/mark" method="post" style="display:inline"><button class="btn btn--subtle" type="submit">标记处理</button></form>
+          {% endif %}
+        </td>
+      </tr>
+    {% else %}
+      <tr><td colspan="7" class="muted">暂无留言</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>挪车联系 - Move Car</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <meta name="color-scheme" content="light dark" />
+</head>
+<body>
+  <div class="container" style="max-width:640px">
+    <h1 style="margin:.2rem 0 1rem">联系车主</h1>
+    {% if error %}
+      <p class="error">{{ error }}</p>
+    {% elif code %}
+      <div class="card">
+        <p class="muted">无需手机号，匿名留言给车主。可附一张照片（车位/现场）。</p>
+        <form method="post" action="/c/{{ code.public_code }}" enctype="multipart/form-data" class="stack">
+          <div>
+            <label>留言内容</label>
+            <textarea name="content_text" rows="5" maxlength="1000" placeholder="例如：您好，麻烦挪一下车。我需要出库，谢谢！"></textarea>
+          </div>
+          <div>
+            <label>现场照片（可选，jpg/png/webp，≤5MB）</label>
+            <input type="file" name="uploaded" accept="image/jpeg,image/png,image/webp">
+          </div>
+          <div class="row">
+            <button class="btn" type="submit">发送留言</button>
+            <span class="muted">预计数分钟内查看</span>
+          </div>
+        </form>
+        {% if request.query_params.get('ok') %}
+        <p style="margin-top:10px">留言已发送，感谢配合。</p>
+        {% endif %}
+      </div>
+    {% endif %}
+  </div>
+</body>
+</html>

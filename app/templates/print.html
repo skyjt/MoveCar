@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>打印挪车码</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <meta name="color-scheme" content="light dark" />
+  <style>
+    /* Print-optimized sheet */
+    .print-container { max-width: 860px; margin: 0 auto; }
+    .sheet { background: #fff; color: #000; border: 1px solid #ddd; border-radius: 16px; padding: 26px; }
+    .headline { font-size: 28px; font-weight: 900; letter-spacing: .4px; margin: 4px 0 10px; text-align: center; }
+    .subline { color: #333; text-align: center; margin-bottom: 10px; }
+    .qr-block { display: flex; flex-direction: column; align-items: center; gap: 12px; margin: 10px 0 14px; }
+    .qr-img { background:#fff; padding: 10px; border: 2px dashed #ccc; border-radius: 8px; }
+    .hint { color:#333; text-align: center; font-size: 14px; letter-spacing: .1px; }
+    .fallback { margin-top: 10px; }
+    .fallback__title { text-align:center; color:#444; font-size: 14px; margin-bottom: 6px; }
+    .url-line { overflow-wrap: anywhere; word-break: break-word; background: #f6f8fa; border: 1px solid #e5e7eb; padding: 10px 12px; border-radius: 8px; line-height: 1.35; letter-spacing: .2px; }
+    .url-center { text-align: center; font-weight: 600; font-size: 16px; }
+    .toolbar { display:flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 14px; }
+    .btn-print { background:#0f172a; color:#fff; }
+    .btn-copy { background:#2b2f45; color:#fff; }
+    @media print {
+      body { background: #fff !important; }
+      .container { padding: 0; }
+      .sheet { border: 0; border-radius: 0; padding: 12mm; }
+      .toolbar { display: none; }
+      .headline { font-size: 30px; }
+      .qr-img { border: 0; padding: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container print-container">
+    <div class="sheet">
+      <div class="headline">挪车请扫码</div>
+      {% if code.display_name %}
+        <div class="subline">车辆：{{ code.display_name }}</div>
+      {% endif %}
+      <div class="qr-block">
+        <img class="qr-img" src="/qr/{{ code.public_code }}.png?scale=12&border=2" alt="挪车二维码">
+        <div class="hint">匿名联系车主 | 无需手机号 | 支持留言图片</div>
+      </div>
+      <div class="fallback">
+        <div class="fallback__title">扫码失败可手动访问</div>
+        <div class="url-line url-center" id="print-url">{{ url }}</div>
+      </div>
+      <div class="toolbar">
+        <a class="btn" href="/qr/{{ code.public_code }}.png?scale=12&border=2" download="movecar-{{ code.public_code }}.png">下载 PNG</a>
+        <a class="btn btn--ghost" href="/c/{{ code.public_code }}" target="_blank">预览落地页</a>
+        <button class="btn btn--subtle btn-copy" onclick="copyUrl()" type="button">复制链接</button>
+        <button class="btn btn-print" onclick="window.print()">打印此页</button>
+      </div>
+    </div>
+    <div class="muted" style="text-align:center; margin-top:10px">建议实际打印二维码边长 ≥ 25mm，并保留足够留白</div>
+  </div>
+  <script>
+    function copyUrl(){
+      var el = document.getElementById('print-url');
+      if (!el) return;
+      var text = el.innerText || '';
+      if (navigator && navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).catch(function(){});
+      } else {
+        var ta = document.createElement('textarea');
+        ta.value = text; document.body.appendChild(ta); ta.select(); try{ document.execCommand('copy'); }catch(e){};
+        document.body.removeChild(ta);
+      }
+    }
+  </script>
+</body>
+</html>
