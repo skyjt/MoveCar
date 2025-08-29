@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+
+# Virtual environments
+.venv/
+venv/
+
+# Environment files
+.env
+
+# OS / IDE
+.DS_Store
+.vscode/
+.idea/
+
+# Local data/uploads
+data/
+uploads/
+
+# Byte-compiled C extensions
+*.so
