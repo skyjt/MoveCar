@@ -1,72 +1,81 @@
-# Move Car 挪车码（开源自部署）
+# Move My Car (self-hosted, privacy-friendly)
 
-一个开源、可自部署、隐私友好的“公共挪车码”工具。面向个人/社区，无需暴露手机号即可与车主建立匿名联系。MVP 聚焦：挪车码管理、匿名留言（文本+图片）、站内提醒、基础防滥用、打印/电子码。
+English documentation. For Chinese, see: readme_zh.md
 
-## 快速开始
-- Docker（推荐）
-  - 复制配置：`cp .env.example .env`
-  - 启动服务：`docker compose up -d`
-  - 访问：`http://localhost:8000/login`（默认账户 `admin/admin`）
-- 本地开发运行（不使用 Docker）
-  - 创建虚拟环境：`python -m venv .venv && source .venv/bin/activate`
-  - 安装依赖：`pip install -r requirements.txt`
-  - 可选导入环境：`cp .env.example .env && export $(grep -v '^#' .env | xargs)`
-  - 启动开发服务：`uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload`
-  - 打开：`http://127.0.0.1:8000/login`
+An open-source, self-hosted “move my car” QR code tool. It lets visitors contact the car owner anonymously without exposing a phone number. The MVP focuses on: code management, anonymous messages (text + image), lightweight notifications, basic abuse protection, and printable/online QR codes.
 
-## 基本使用
-1) 登录 → 进入“仪表盘”。
-2) 新建挪车码 → 点击“打印 / 下载二维码”查看二维码并下载 PNG；
-3) 访客扫码进入 `/c/{public_code}` → 留言（可附 1 张图片 ≤5MB）。
-4) 车主在仪表盘查看、回复（站内）、标记“已处理”。
+## Quick Start
+- Docker (recommended)
+  - Copy config: `cp .env.example .env`
+  - Start: `docker compose up -d`
+  - Open: `http://localhost:8000/login` (default admin `admin/admin`)
+- Local (without Docker)
+  - Create venv: `python -m venv .venv && source .venv/bin/activate`
+  - Install deps: `pip install -r requirements.txt`
+  - Optional env: `cp .env.example .env && export $(grep -v '^#' .env | xargs)`
+  - Run dev server: `uvicorn app.main:app --reload --host 127.0.0.1 --port 8000`
+  - Open: `http://127.0.0.1:8000/login`
 
-### 通知设置（Bark）
-- 每个挪车码都可单独设置通知：仪表盘 → 目标码 → “通知设置”。
-- 渠道：
-  - 无：不发送 Webhook 通知（默认）。
-  - Bark：参考教程 https://bark.day.app/#/tutorial 在 Bark App 获取 Token。
-- 配置 Bark：
-  - 基础 URL：默认 `https://api.day.app`（可保留）。
-  - Token：粘贴 Bark 设备 Token。
-  - 保存后可点“发送测试通知”验证（成功将收到一条“测试通知”）。
-- 生效时机：访客在落地页留言成功后，会推送“挪车提醒+留言摘要”，并附带仪表盘链接。
-- 关闭通知：将渠道改为“无”并保存。
+## What You Can Do
+- Create and manage multiple move-codes (activate/pause/delete, display name).
+- Print or download a QR code PNG for each code.
+- Let visitors scan `/c/{public_code}` and leave a message (text + optional image ≤ 5 MB).
+- Review messages on the dashboard and mark “processed”.
+- Optional push notification per code via Bark.
+- Built-in rate limiting and per-code blacklist to reduce abuse.
 
-## 配置（.env）
-- `APP_SECRET`：会话签名密钥（请在生产替换）。
-- `APP_BASE_URL`：外部访问地址，用于打印页链接。
-- `MAX_IMAGE_MB`：上传图片大小（默认 5）。
-- `RATE_LIMIT_WINDOW/COUNT`：限流窗口与次数（默认 60 秒/1 次）。
-- `ANON_CHAT_ENABLED`：是否开启匿名聊天室（MVP 仅留言，默认 false）。
-- `ADMIN_USERNAME/ADMIN_PASSWORD`：默认管理员。
+## Notifications (Bark)
+- Per-code settings: Dashboard → target code → “Notification”.
+- Channels:
+  - None (default): no external push.
+  - Bark: follow https://bark.day.app/#/tutorial to obtain a device token.
+- Configure Bark:
+  - Base URL: default `https://api.day.app`.
+  - Token: paste your Bark device token.
+  - Send a “Test Notification” after saving to verify.
+- When enabled, a successful submission on the landing page triggers a push with a short preview and a dashboard link.
 
-说明：无需配置数据库，默认使用 `data/app.db`（SQLite）；上传图片存储在 `data/uploads/`。Docker 已映射 `./data` 目录，自动持久化数据库与图片。
+## Configuration (.env)
+- `APP_SECRET`: Session signing key (change in production).
+- `APP_BASE_URL`: Public base URL used in printable pages and QR links.
+- `DB_URL`: Database URL; defaults to `sqlite:///data/app.db`.
+- `DATA_DIR`: Data folder for DB and uploads; defaults to `./data`.
+- `MAX_IMAGE_MB`: Upload image limit (default 5).
+- `RATE_LIMIT_WINDOW` / `RATE_LIMIT_COUNT`: Rate limit window and quota (default 60s / 1).
+- `ANON_CHAT_ENABLED`: Whether to enable real-time chat (MVP uses simple message, default false).
+- `ADMIN_USERNAME` / `ADMIN_PASSWORD`: Default admin bootstrap.
 
-## 目录结构
-- `app/`：后端（FastAPI）与模板（Jinja2）。
-- `app/routes/`：页面与 API 路由；`services/`：限流等；`uploads/`：图片上传。
-- `docs/`：文档（`DESIGN.md` 设计文档）。
-- `PRD.md`：需求文档；`tests/`：pytest 测试。
+Notes:
+- SQLite DB is stored under `data/` and images under `data/uploads/`.
+- Docker Compose maps `./data` as a volume so the DB and uploads persist.
 
-## 开发与测试
-- 启动（开发）：`uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload`
-- 查看日志（Docker）：`docker compose logs -f app`
-- 停止（Docker）：`docker compose down`
-- 运行测试：`pytest -q`
-- 关键端点：
-  - 登录页：`/login`；仪表盘：`/dashboard`
-  - 扫码落地页：`/c/{public_code}`
-  - 打印/下载：`/print/{public_code}`（内含下载按钮）
-  - 直接二维码：`/qr/{public_code}.png?scale=10&border=2`
-  - 通知设置页面：`/codes/{id}/notify`（后台点击入口跳转）
+## Project Structure
+- `app/`: FastAPI backend and Jinja2 templates.
+- `app/routes/`: Page and API routes; `services/`: rate limiting, notifications, etc.
+- `app/templates/`: HTML templates; `app/style.css`, `app/icon.svg` for UI.
+- `docs/`: Documentation (`DESIGN.md`, `PRD.md`).
+- `tests/`: pytest tests for critical routes and services.
 
-## 文档与路线
-- 需求：`PRD.md`
-- 设计：`docs/DESIGN.md`
-- 后续计划：通知适配器（Email/Telegram/NTFY）、共享同一码、一次性码、国际化、PWA、WebRTC 语音等。
+## Development & Tests
+- Dev server: `uvicorn app.main:app --reload --host 127.0.0.1 --port 8000`
+- Docker logs: `docker compose logs -f app`
+- Stop Docker: `docker compose down`
+- Run tests: `pytest -q`
+- Useful routes:
+  - Login: `/login` → Dashboard: `/dashboard`
+  - Landing: `/c/{public_code}`
+  - Print: `/print/{public_code}` (download button included)
+  - QR PNG: `/qr/{public_code}.png?scale=10&border=2`
+  - Per-code notification page: `/codes/{id}/notify`
 
-提示
-- 若出现“attempt to write a readonly database”，请确认当前目录可写或设置 `DB_URL=sqlite:///./data/dev.db`；
-- 首次运行会自动创建 `data/` 与 `data/uploads/` 目录；
-- 生成二维码依赖 `segno`（已包含）、PNG 写出依赖 `pypng`（已包含）。生产部署请开启 HTTPS，并修改 `APP_SECRET` 与管理员密码；同时持久化 `data/` 目录（包含数据库与图片）。
-- Bark 推送失败排查：检查基础 URL 是否可达、Token 是否正确、服务器是否能访问外网（防火墙/代理），以及返回的 HTTP 状态码与报错信息。
+## Docs & Roadmap
+- Product: `docs/PRD.md`
+- Design: `docs/DESIGN.md`
+- Roadmap (next): email/Telegram/NTFY adapters, shared codes (family), expiring/one-time codes, i18n, PWA, optional WebRTC voice.
+
+## Tips & Troubleshooting
+- “attempt to write a readonly database”: ensure the working directory is writable or set `DB_URL=sqlite:///./data/dev.db`.
+- On first run, the app creates `data/` and `data/uploads/` automatically.
+- QR generation uses `segno`; PNG writing uses `pypng`.
+- For production, enable HTTPS (via Caddy/Nginx), change `APP_SECRET` and the default admin password, and persist `data/`.
+- Bark issues: check base URL reachability, token correctness, outbound connectivity, and returned HTTP status.
