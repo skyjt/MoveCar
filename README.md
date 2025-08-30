@@ -12,7 +12,7 @@ An open-source, self-hosted “move my car” QR code tool. It lets visitors con
 - Local (without Docker)
   - Create venv: `python -m venv .venv && source .venv/bin/activate`
   - Install deps: `pip install -r requirements.txt`
-  - Optional env: `cp .env.example .env && export $(grep -v '^#' .env | xargs)`
+  - Env file: `cp .env.example .env` (the app auto-loads `.env` via python-dotenv)
   - Run dev server: `uvicorn app.main:app --reload --host 127.0.0.1 --port 8000`
   - Open: `http://127.0.0.1:8000/login`
 

@@ -5,9 +5,21 @@
 - 提供 `SessionLocal` 与 `get_db` 依赖；
 - 初始化数据表（必要时降级到内存库以适配受限环境）；
 - 引导默认管理员账号（`bootstrap_admin`）。
+
+变更说明：
+- 自动加载项目根目录下的 `.env`（若安装了 `python-dotenv`），便于本地开发无需手动 `export`；
+- `bootstrap_admin` 现在会在检测到环境变量中的管理员密码变更时，自动更新现有管理员的密码哈希，确保修改 `.env` 后生效。
 """
 
 import os
+try:
+    # 优先在模块导入时加载 .env，使得后续读取的环境变量可生效（不覆盖已有环境变量）
+    from dotenv import load_dotenv  # type: ignore
+
+    load_dotenv(override=False)
+except Exception:
+    # 未安装 python-dotenv 或其他异常时忽略，保持向后兼容
+    pass
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 from sqlalchemy.exc import OperationalError
@@ -79,9 +91,15 @@ def init_db():
 
 
 def bootstrap_admin():
-    """引导默认管理员：若不存在则创建（幂等）。"""
+    """引导默认管理员：若不存在则创建；若存在且密码与环境变量不匹配则更新。
+
+    设计意图：
+    - 许多用户在 `.env` 中调整 `ADMIN_PASSWORD`，期望重启后立即生效；
+    - 之前逻辑仅在“管理员不存在”时创建，导致修改密码不生效；
+    - 现逻辑在管理员已存在时会比对环境变量密码，若不匹配则刷新密码哈希。
+    """
     from .models import User
-    from .utils import hash_password
+    from .utils import hash_password, verify_password
 
     username = os.getenv("ADMIN_USERNAME", "admin")
     password = os.getenv("ADMIN_PASSWORD", "admin")
@@ -89,9 +107,15 @@ def bootstrap_admin():
     try:
         user = db.query(User).filter(User.username == username).first()
         if not user:
+            # 不存在则创建默认管理员
             user = User(username=username, password_hash=hash_password(password))
             db.add(user)
             db.commit()
+        else:
+            # 已存在则校验密码是否与环境变量一致，不一致则更新（支持 .env 修改后生效）
+            if password and not verify_password(password, user.password_hash):
+                user.password_hash = hash_password(password)
+                db.commit()
     finally:
         db.close()
 

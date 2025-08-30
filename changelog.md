@@ -17,3 +17,9 @@
 - Added `.dockerignore` to keep Docker contexts small
 - Updated `README.md` with Packaging instructions
 - Key files: `scripts/package.sh`, `.dockerignore`, `README.md`
+
+2025-08-30 fix: apply .env admin password changes; auto-load .env
+- `bootstrap_admin` now updates existing admin password when `ADMIN_PASSWORD` changes in `.env`/env
+- Auto-load `.env` on startup (via `python-dotenv`) so local runs pick up config without manual export
+- Updated `requirements.txt` and README local env guidance
+- Key files: `app/database.py`, `requirements.txt`, `README.md`
