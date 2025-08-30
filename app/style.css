@@ -321,7 +321,11 @@ code { background: var(--code-bg); border:1px solid var(--border); color: var(--
   border: 1px solid var(--danger-border);
 }
 
-/* 开关样式优化（iOS 风格滑块） */
+/* 开关样式优化（iOS 风格滑块）
+   视觉与可用性改进：
+   - 提升圆球（拇指）对比度：增加描边与更明显的投影，暗色背景下更清晰。
+   - 垂直居中：改为 top:50% + translateY(-50%)，避免边框/阴影造成的视觉偏移。
+*/
 .switch { 
   position: relative; 
   display: inline-flex; 
@@ -354,19 +358,24 @@ code { background: var(--code-bg); border:1px solid var(--border); color: var(--
   background: var(--card); 
   border-radius: 999px; 
   transition: var(--transition); 
+  /* 适度更显眼的边框与内阴影，提高与背景的区分度 */
   border: 1px solid var(--border); 
-  box-shadow: inset 0 2px 4px rgba(0,0,0,.1);
+  box-shadow: inset 0 2px 4px rgba(0,0,0,.18);
 }
 .switch__thumb { 
   position: absolute; 
-  top: var(--switch-pad); 
+  /* 垂直居中：结合 translateY(-50%) 解决视觉不居中问题 */
+  top: 50%; 
   left: var(--switch-pad); 
   width: var(--switch-thumb); 
   height: var(--switch-thumb); 
+  /* 提升拇指对比度：白底 + 深色描边 + 更明显的阴影 */
   background: #fff; 
+  border: 1px solid rgba(0,0,0,.35);
   border-radius: 50%; 
   transition: var(--transition); 
-  box-shadow: var(--shadow-sm);
+  transform: translate(0, -50%);
+  box-shadow: 0 1px 2px rgba(0,0,0,.45), 0 0 0 1px rgba(255,255,255,.05);
 }
 .switch__input:checked + .switch__track { 
   background: var(--success); 
@@ -374,8 +383,9 @@ code { background: var(--code-bg); border:1px solid var(--border); color: var(--
   box-shadow: inset 0 0 0 2px var(--success-border);
 }
 .switch__input:checked + .switch__track .switch__thumb { 
-  transform: translateX(calc(var(--switch-w) - var(--switch-thumb) - 2 * var(--switch-pad))); 
-  box-shadow: var(--shadow);
+  /* 同步保持垂直居中，水平平移至右侧 */
+  transform: translate(calc(var(--switch-w) - var(--switch-thumb) - 2 * var(--switch-pad)), -50%); 
+  box-shadow: 0 2px 4px rgba(0,0,0,.5), 0 0 0 1px rgba(255,255,255,.06);
 }
 .switch__input:focus-visible + .switch__track { 
   box-shadow: 0 0 0 3px rgba(79,124,255,.35); 
