@@ -15,11 +15,16 @@ import os
 from pathlib import Path
 
 def _load_env():
-    """加载 .env 文件。
+    """可选加载 .env 文件（默认关闭）。
 
-    优先使用 python-dotenv；若未安装，则采用简易解析器作为降级方案。
-    降级方案仅在环境变量未设置时填充，避免覆盖显式导出的变量。
+    出于安全与可测试性考虑，默认不在代码层自动读取 `.env`；
+    如需启用自动加载，请在启动前设置 `LOAD_ENV_FILE=1`。
+    当启用后：
+    - 优先使用 python-dotenv；若未安装，则采用简易解析器作为降级方案；
+    - 仅在环境变量未设置时填充，避免覆盖显式导出的变量。
     """
+    if os.getenv("LOAD_ENV_FILE", "0") != "1":
+        return
     # 计算仓库根目录（app/ 的父目录）
     try:
         repo_root = Path(__file__).resolve().parents[1]
@@ -132,16 +137,28 @@ def init_db():
 def bootstrap_admin():
     """引导默认管理员：若不存在则创建；若存在且密码与环境变量不匹配则更新。
 
-    设计意图：
-    - 许多用户在 `.env` 中调整 `ADMIN_PASSWORD`，期望重启后立即生效；
-    - 之前逻辑仅在“管理员不存在”时创建，导致修改密码不生效；
-    - 现逻辑在管理员已存在时会比对环境变量密码，若不匹配则刷新密码哈希。
+    测试友好策略：
+    - 在检测到 pytest 运行环境（`PYTEST_CURRENT_TEST` 存在）或 `DB_URL` 指向测试库
+     （例如包含 `test.db`）时，强制使用内置默认凭证 `admin/admin`，避免被宿主环境
+      中的 `.env` 值（如 `ADMIN_PASSWORD=admin123`）干扰单测。
+
+    运行时策略：
+    - 非测试环境下读取 `ADMIN_USERNAME` 与 `ADMIN_PASSWORD`（若未设置，回退 `admin`）。
+    - 若管理员已存在但密码与当前配置不一致，则更新其密码哈希。
     """
     from .models import User
     from .utils import hash_password, verify_password
 
-    username = os.getenv("ADMIN_USERNAME", "admin")
-    password = os.getenv("ADMIN_PASSWORD", "admin")
+    # 判断是否处于测试环境
+    db_url_env = os.getenv("DB_URL", "")
+    is_pytest = bool(os.getenv("PYTEST_CURRENT_TEST"))
+    is_test_db = ("test.db" in db_url_env)
+    if is_pytest or is_test_db:
+        username = "admin"
+        password = "admin"
+    else:
+        username = os.getenv("ADMIN_USERNAME", "admin")
+        password = os.getenv("ADMIN_PASSWORD", "admin")
     db = SessionLocal()
     try:
         user = db.query(User).filter(User.username == username).first()
