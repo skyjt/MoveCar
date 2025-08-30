@@ -67,3 +67,27 @@
 - `scripts/package.sh vX.Y.Z` 生成 `MoveCar-vX.Y.Z.tar.gz`
 - 保留默认 `<timestamp>-<rev>` 命名
 - 文档：README Packaging 使用说明已更新
+
+2025-08-30 fix(test): 测试环境下避免 .env 干扰管理员密码
+- 默认不再在代码中自动加载 `.env`；如需启用，设置 `LOAD_ENV_FILE=1`
+- `bootstrap_admin` 在 pytest/测试库(`test.db`) 环境下强制使用 `admin/admin`，避免宿主 `.env` 覆盖单测默认值
+- 关键文件：`app/database.py`
+
+2025-08-30 refactor: 轻度清理与注释优化
+- 去除未使用的导入（`app/main.py`）
+- 简化时间格式化实现，移除不必要的 `pytz` 依赖路径（函数内部保护性处理）
+- 小幅中文注释补充与健壮性兜底
+- 关键文件：`app/main.py`, `app/routes/pages.py`
+
+2025-08-30 docs: 重写与完善 README（中英）与根 PRD
+- README：补充完整技术栈、配置、开发与测试指引、安全注意事项、故障排查
+- 中文 README 同步；新增根目录 `PRD.md` 指向 `docs/PRD.md`
+- 关键文件：`README.md`, `readme_zh.md`, `PRD.md`
+
+2025-08-30 refactor: 适配 Starlette 模板新签名，消除弃用告警
+- 将 `templates.TemplateResponse(name, {"request": request, ...})` 改为 `templates.TemplateResponse(request, name, {...})`
+- 关键文件：`app/routes/pages.py`
+
+2025-08-30 chore(security): 从仓库移除本地 `.env`（已在 .gitignore）
+- 防止误提交敏感信息，后续请基于 `.env.example` 配置
+- 关键：本次仅移除工作区文件，不影响历史提交记录

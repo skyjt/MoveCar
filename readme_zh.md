@@ -5,9 +5,9 @@
 English version: [README.md](README.md)
 
 ## 技术栈
-- Python（FastAPI）
-- HTML（Jinja2 模板）
-- [Codex CLI](https://github.com/openai/codex)
+- Python 3.12、FastAPI、Starlette、Uvicorn
+- SQLAlchemy 2.x、SQLite（默认）
+- Jinja2 模板、Segno（二维码）、httpx
 
 ## 快速开始
 - Docker（推荐）
@@ -17,7 +17,7 @@ English version: [README.md](README.md)
 - 本地开发（不使用 Docker）
   - 创建虚拟环境：`python -m venv .venv && source .venv/bin/activate`
   - 安装依赖：`pip install -r requirements.txt`
-  - 准备环境文件：`cp .env.example .env`（应用会通过 python-dotenv 自动加载 `.env`）
+  - 如需让应用自动读取 `.env`：`export LOAD_ENV_FILE=1 && cp .env.example .env`
   - 启动开发服务：`uvicorn app.main:app --reload --host 127.0.0.1 --port 8000`
   - 打开：`http://127.0.0.1:8000/login`
 
@@ -56,7 +56,7 @@ English version: [README.md](README.md)
 - `ANON_CHAT_ENABLED`：是否开启匿名聊天室（MVP 仅留言，默认 false）。
 - `ADMIN_USERNAME/ADMIN_PASSWORD`：默认管理员引导账号。
 
-说明：默认使用 SQLite，数据库文件位于 `data/`；图片保存于 `data/uploads/`。Docker 已映射 `./data` 目录，自动持久化。
+说明：默认不自动加载 `.env`（保持测试可重复），如需启用请设置 `LOAD_ENV_FILE=1`。默认使用 SQLite，数据库文件位于 `data/`；图片保存于 `data/uploads/`；Docker 已映射 `./data` 目录用于持久化。
 
 ## 目录结构
 - `app/`：后端（FastAPI）与模板（Jinja2）。
@@ -69,7 +69,11 @@ English version: [README.md](README.md)
 - 开发运行：`uvicorn app.main:app --reload --host 127.0.0.1 --port 8000`
 - Docker 日志：`docker compose logs -f app`
 - 停止 Docker：`docker compose down`
-- 运行测试：`pytest -q`
+- 运行测试：`PYTHONPATH=. pytest -q`
+- Lint/Format（如已安装）：`ruff check .`、`black .`
+
+测试行为说明
+- 在 pytest 或当 `DB_URL` 指向测试库（如 `data/test.db`）时，管理员凭据强制为 `admin/admin`，避免宿主机 `.env` 干扰测试。
 - 常用路由：
   - 登录：`/login`；仪表盘：`/dashboard`
   - 扫码落地页：`/c/{public_code}`
@@ -87,6 +91,11 @@ English version: [README.md](README.md)
 - 需求：`docs/PRD.md`
 - 设计：`docs/DESIGN.md`
 - 规划：通知适配器（Email/Telegram/NTFY）、家庭共享同一码、一次性码/有效期、国际化、PWA、可选 WebRTC 语音。
+
+## 安全与合规
+- 请勿提交 `.env` 或任何密钥到仓库（使用 `.env.example` 作为模板）。如已泄露，请及时更换密钥。
+- 使用 HTTPS 反代（Caddy/Nginx），并持久化 `data/` 与 `uploads/` 目录。
+- 避免收集个人敏感信息（默认不存储手机号）；对外分享日志前请脱敏。
 
 ## 提示与排错
 - “attempt to write a readonly database”：请确保工作目录可写，或设置 `DB_URL=sqlite:///./data/dev.db`。
