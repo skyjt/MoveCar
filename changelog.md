@@ -11,6 +11,12 @@
   - 代码状态改为滑块开关（状态栏内切换），移除“切换启用”按钮
   - 关键文件：`app/style.css`, `app/templates/dashboard.html`, `app/templates/base.html`
 
+2025-08-30
+- ui: iOS 风格滑块开关与背景条带优化
+  - 将状态开关实现为原生 checkbox + 自定义轨道/圆点，达到 iOS 视觉与动效
+  - 为深/浅色背景叠加极低透明度的重复线性纹理，降低渐变条带与滚动断层感知
+  - 关键文件：`app/style.css`, `app/templates/dashboard.html`
+
 2025-08-29
 - docs: add English README as default (README.md)
 - docs: add Chinese version (readme_zh.md) and cross-link
