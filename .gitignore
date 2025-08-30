@@ -22,5 +22,8 @@ venv/
 data/
 uploads/
 
+# Build artifacts
+dist/
+
 # Byte-compiled C extensions
 *.so
