@@ -9,11 +9,11 @@
       <tr>
         <td>{{ c.display_name or '-' }}</td>
         <td>
-          {# 状态用滑块开关展示；切换即提交到 /codes/{id}/toggle #}
+          {# 状态用 iOS 风格滑块开关；切换即提交到 /codes/{id}/toggle #}
           <form action="/codes/{{ c.id }}/toggle" method="post" class="inline">
             <label class="switch" title="点击切换启用状态">
-              <input type="checkbox" name="enabled" {% if c.status == 'ACTIVE' %}checked{% endif %} onchange="this.form.submit()">
-              <span class="slider"></span>
+              <input class="switch__input" role="switch" aria-checked="{{ 'true' if c.status == 'ACTIVE' else 'false' }}" type="checkbox" name="enabled" {% if c.status == 'ACTIVE' %}checked{% endif %} onchange="this.form.submit()">
+              <span class="switch__track"><span class="switch__thumb"></span></span>
             </label>
             {% if c.status == 'ACTIVE' %}
               <span class="status status--ok"><strong>生效</strong></span>
