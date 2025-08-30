@@ -17,6 +17,12 @@
   - 为深/浅色背景叠加极低透明度的重复线性纹理，降低渐变条带与滚动断层感知
   - 关键文件：`app/style.css`, `app/templates/dashboard.html`
 
+2025-08-30
+- feat(ui/mobile): 仪表盘“我的挪车码”在手机端改为分块展示
+  - 名称（标题）/ 状态 / 创建时间 / 操作 / 链接 分行显示，按钮自动换行不再挤在一列
+  - 桌面端保留表格，手机端自动隐藏表格并显示分块卡片
+  - 关键文件：`app/templates/dashboard.html`, `app/style.css`
+
 2025-08-29
 - docs: add English README as default (README.md)
 - docs: add Chinese version (readme_zh.md) and cross-link
