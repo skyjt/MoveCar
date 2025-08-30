@@ -373,7 +373,7 @@ code { background: var(--code-bg); border:1px solid var(--border); color: var(--
   background: #fff; 
   border: 1px solid rgba(0,0,0,.35);
   border-radius: 50%; 
-  transition: left var(--transition), transform var(--transition), box-shadow var(--transition); 
+  transition: var(--transition); 
   transform: translate(0, -50%);
   box-shadow: 0 1px 2px rgba(0,0,0,.45), 0 0 0 1px rgba(255,255,255,.05);
 }
@@ -383,9 +383,8 @@ code { background: var(--code-bg); border:1px solid var(--border); color: var(--
   box-shadow: inset 0 0 0 2px var(--success-border);
 }
 .switch__input:checked + .switch__track .switch__thumb { 
-  /* 通过 left: calc(100% - pad - thumb) 对齐右侧，避免父元素 border/宽度计算误差 */
-  left: calc(100% - var(--switch-pad) - var(--switch-thumb));
-  transform: translate(0, -50%);
+  /* 同步保持垂直居中，水平平移至右侧 */
+  transform: translate(calc(var(--switch-w) - var(--switch-thumb) - 2 * var(--switch-pad)), -50%); 
   box-shadow: 0 2px 4px rgba(0,0,0,.5), 0 0 0 1px rgba(255,255,255,.06);
 }
 .switch__input:focus-visible + .switch__track { 
