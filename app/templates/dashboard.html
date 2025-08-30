@@ -9,17 +9,24 @@
       <tr>
         <td>{{ c.display_name or '-' }}</td>
         <td>
-          {# 将英文状态转换为中文，并使用醒目颜色展示 #}
-          {% if c.status == 'ACTIVE' %}
-            <span class="status status--ok"><strong>生效</strong></span>
-          {% else %}
-            <span class="status status--bad"><strong>失效</strong></span>
-          {% endif %}
+          {# 状态用滑块开关展示；切换即提交到 /codes/{id}/toggle #}
+          <form action="/codes/{{ c.id }}/toggle" method="post" class="inline">
+            <label class="switch" title="点击切换启用状态">
+              <input type="checkbox" name="enabled" {% if c.status == 'ACTIVE' %}checked{% endif %} onchange="this.form.submit()">
+              <span class="slider"></span>
+            </label>
+            {% if c.status == 'ACTIVE' %}
+              <span class="status status--ok"><strong>生效</strong></span>
+            {% else %}
+              <span class="status status--bad"><strong>失效</strong></span>
+            {% endif %}
+            <button type="submit" style="display:none">提交</button>
+          </form>
         </td>
         <td class="muted">{{ c.created_at|fmt_dt }}</td>
         <td>
           <div class="actions">
-            <form action="/codes/{{ c.id }}/toggle" method="post" class="inline"><button class="btn btn--subtle" type="submit">切换启用</button></form>
+            {# 操作中去掉“切换启用”，改由状态开关控制 #}
             <a class="btn" href="/print/{{ c.public_code }}" target="_blank">打印 / 下载二维码</a>
             <a class="btn btn--ghost" href="/codes/{{ c.id }}/notify">通知设置</a>
             <form action="/codes/{{ c.id }}/delete" method="post" class="inline" onsubmit="return confirm('确定删除该挪车码？相关留言将一并删除。');"><button class="btn btn--ghost" type="submit">删除</button></form>
