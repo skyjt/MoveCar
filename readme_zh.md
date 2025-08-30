@@ -7,7 +7,7 @@ English version: [README.md](README.md)
 ## 技术栈
 - Python（FastAPI）
 - HTML（Jinja2 模板）
-- Codex CLI（https://github.com/openai/codex）
+- [Codex CLI](https://github.com/openai/codex)
 
 ## 快速开始
 - Docker（推荐）

@@ -7,7 +7,7 @@ An open-source, self-hosted “move my car” QR code tool. It lets visitors con
 ## Tech Stack
 - python
 - html
-- **codex cli**（https://github.com/openai/codex）
+- [**codex cli**](https://github.com/openai/codex)
 
 ## Quick Start
 - Docker (recommended)
