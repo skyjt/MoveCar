@@ -1,48 +1,67 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{{ title or site_title or 'Move Car 挪车码' }}</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}MoveCar 挪车码{% endblock %}</title>
   <link rel="stylesheet" href="/static/style.css">
-  <meta name="color-scheme" content="light dark" />
-  <link rel="icon" href="/static/icon.svg" type="image/svg+xml">
-  <link rel="apple-touch-icon" href="/static/icon.png">
-  {% block head %}{% endblock %}
-  {% block extra_css %}{% endblock %}
+<link rel="icon" href="/static/icon.svg" type="image/svg+xml">
 </head>
 <body>
-  <div class="bgfx" aria-hidden="true"></div>
-  <div class="container">
+  <!-- 引入图标系统 -->
+  {% include 'icons.html' %}
+  
+  <div class="container fade-in">
     <header class="topbar">
-      <div class="topbar__title">{{ header or 'Move Car 挪车码' }}</div>
+      <div class="topbar__title">
+        <a href="/" class="link">
+          <svg class="icon" width="24" height="24">
+            <use href="#icon-qr"></use>
+          </svg>
+          MoveCar 挪车码
+        </a>
+      </div>
       <nav class="topbar__nav">
-        {% if request.session.get('user_id') %}
-          <a href="/dashboard" class="link">仪表盘</a>
-          <a href="/codes/new" class="link">新建挪车码</a>
-          <form action="/logout" method="post" class="inline">
-            <button class="btn btn--subtle" type="submit">退出</button>
-          </form>
+        {% if session.get('user_id') %}
+          <a href="/" class="link">
+            <svg class="icon" width="16" height="16">
+              <use href="#icon-user"></use>
+            </svg>
+            仪表盘
+          </a>
+          <a href="/codes/new" class="link">
+            <svg class="icon" width="16" height="16">
+              <use href="#icon-plus"></use>
+            </svg>
+            新建码
+          </a>
+          <a href="/logout" class="link">
+            <svg class="icon" width="16" height="16">
+              <use href="#icon-logout"></use>
+            </svg>
+            退出
+          </a>
         {% else %}
-          <a class="btn btn--subtle" href="/login">登录</a>
+          <a href="/login" class="link">
+            <svg class="icon" width="16" height="16">
+              <use href="#icon-login"></use>
+            </svg>
+            登录
+          </a>
         {% endif %}
       </nav>
     </header>
-    {% block content %}{% endblock %}
+
+    <main>
+      {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer">
+      <p>&copy; 2024 MoveCar 挪车码 <span class="sep">|</span> 开源项目 <span class="sep">|</span> 保护隐私</p>
+    </footer>
   </div>
-  {# 页脚：提供更协调的视觉样式，支持自定义 HTML #}
-  <footer class="footer">
-    <div class="container">
-      {% if site_footer_html %}
-        {{ site_footer_html | safe }}
-      {% else %}
-        <div>
-          <span class="muted">© Move Car</span>
-          <span class="sep">·</span>
-          <a class="footer-link" href="https://github.com/skyjt/MoveCar" target="_blank" rel="noopener">GitHub: skyjt/MoveCar</a>
-        </div>
-      {% endif %}
-    </div>
-  </footer>
+  
+  <!-- 通知容器 -->
+  <div id="notifications"></div>
 </body>
 </html>
