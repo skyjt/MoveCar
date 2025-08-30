@@ -8,7 +8,14 @@
     {% for c in codes %}
       <tr>
         <td>{{ c.display_name or '-' }}</td>
-        <td>{{ c.status }}</td>
+        <td>
+          {# 将英文状态转换为中文，并使用醒目颜色展示 #}
+          {% if c.status == 'ACTIVE' %}
+            <span class="status status--ok"><strong>生效</strong></span>
+          {% else %}
+            <span class="status status--bad"><strong>失效</strong></span>
+          {% endif %}
+        </td>
         <td class="muted">{{ c.created_at|fmt_dt }}</td>
         <td>
           <div class="actions">
@@ -75,7 +82,14 @@ function autofillBase(){
         <td>{{ m.content_text or '-' }}</td>
         <td>{% if m.image_path %}<a href="{{ m.image_path }}" target="_blank">查看</a>{% else %}-{% endif %}</td>
         <td class="muted">{{ m.created_at|fmt_dt }}</td>
-        <td>{{ '已处理' if m.processed else '未处理' }}</td>
+        <td>
+          {# 留言处理状态使用中文，并以颜色区分 #}
+          {% if m.processed %}
+            <span class="status status--ok"><strong>已处理</strong></span>
+          {% else %}
+            <span class="status status--bad"><strong>未处理</strong></span>
+          {% endif %}
+        </td>
         <td>
           {% if not m.processed %}
           <form action="/messages/{{ m.id }}/mark" method="post" style="display:inline"><button class="btn btn--subtle" type="submit">标记处理</button></form>

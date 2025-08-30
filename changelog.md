@@ -3,6 +3,13 @@
   - 增加 技术栈/你可以做什么/打包/提示与排错 等章节，统一配置与路由说明
   - 关键文件：`readme_zh.md`
 
+2025-08-30
+- style: 优化仪表盘滚动背景与页脚视觉
+  - 背景使用固定径向渐变叠加底色，滚动不再出现“断层”
+  - 页脚统一样式与留白，移除内联样式，支持自定义 HTML
+  - 状态中文化并加粗着色：生效（绿色）、失效（红色）；留言“已处理/未处理”同样适配
+  - 关键文件：`app/style.css`, `app/templates/dashboard.html`, `app/templates/base.html`
+
 2025-08-29
 - docs: add English README as default (README.md)
 - docs: add Chinese version (readme_zh.md) and cross-link

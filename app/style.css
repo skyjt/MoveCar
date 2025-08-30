@@ -9,15 +9,24 @@
   --border: #222533;
   --code-bg: #0f1322;
   --code-fg: #c6d2ff;
+  /* 语义颜色：成功/错误（用于状态展示） */
+  --success: #22c55e;
+  --danger: #ef4444;
 }
 * { box-sizing: border-box; }
-html, body { height: 100%; }
+/* 保证背景在长页面滚动时保持连续，避免“断层” */
+html { height: 100%; background: var(--bg); }
+body {
+  min-height: 100%;
+}
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
   font-size: 16px;
   line-height: 1.5;
   color: var(--text);
-  background: radial-gradient(1200px 600px at 10% -10%, #14162a, #0b0c10);
+  /* 使用固定附件的径向渐变叠加实色，避免滚动时的背景断层 */
+  background: radial-gradient(1200px 600px at 10% -10%, #14162a, #0b0c10) fixed, var(--bg);
+  background-repeat: no-repeat;
   margin: 0;
 }
 .container { max-width: 1000px; margin: 0 auto; padding: 16px; }
@@ -55,6 +64,11 @@ input:focus, textarea:focus, select:focus { border-color: #3945aa; box-shadow: 0
 
 code { background: var(--code-bg); border:1px solid var(--border); color: var(--code-fg); padding: .1rem .35rem; border-radius: 6px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
 
+/* 状态徽标（中文状态：生效/失效、已处理/未处理） */
+.status { font-weight: 800; letter-spacing: .2px; }
+.status--ok { color: var(--success); }
+.status--bad { color: var(--danger); }
+
 /* Hero (home) */
 .hero { position: relative; overflow: hidden; border-radius: 16px; padding: 64px 24px; margin: 8px 0 16px; }
 .hero__inner { position: relative; max-width: 920px; margin: 0 auto; text-align: center; z-index: 1; }
@@ -67,6 +81,12 @@ code { background: var(--code-bg); border:1px solid var(--border); color: var(--
 /* 表单与输入布局（统一宽度，由容器控制） */
 .input-grow { flex: 1 1 480px; width: auto !important; min-width: 220px; }
 .form-note { text-align: center; }
+
+/* 页脚样式：更协调的留白与分割线 */
+.footer { border-top: 1px solid var(--border); margin: 24px 0 16px; padding: 16px 0; color: var(--muted); text-align: center; }
+.footer .footer-link { color: var(--muted); text-decoration: none; }
+.footer .footer-link:hover { color: var(--text); text-decoration: underline; }
+.footer .sep { margin: 0 .5em; opacity: .6; }
 
 @media (max-width: 720px) {
   .container { padding: 12px; }
@@ -87,9 +107,12 @@ code { background: var(--code-bg); border:1px solid var(--border); color: var(--
     --border: #e5e7eb;
     --code-bg: #f6f8fa;
     --code-fg: #0f172a;
+    --success: #16a34a; /* light 模式下略深的绿色 */
+    --danger: #dc2626;  /* light 模式下略深的红色 */
   }
   body {
-    background: radial-gradient(1200px 600px at 10% -10%, #eaf0ff, #f6f8fb);
+    background: radial-gradient(1200px 600px at 10% -10%, #eaf0ff, #f6f8fb) fixed, var(--bg);
+    background-repeat: no-repeat;
   }
   .card {
     background: var(--card);
