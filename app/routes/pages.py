@@ -48,13 +48,17 @@ rate_limiter = RateLimiter()
 
 
 def _default_footer_html() -> str:
-    """默认页脚 HTML。
+    """默认页脚 HTML（更生动）。
 
-    默认展示版权与项目链接，管理员可在“系统配置”中自定义（支持 HTML）。
+    说明：
+    - 更友好的文案与表情，突出“文明挪车 / 隐私友好 / 开源”。
+    - 管理员可在“系统配置”中自定义（支持 HTML），此处仅为默认兜底。
     """
     return (
-        '<div class="muted">© Move Car · '
-        '<a class="link" href="https://github.com/skyjt/MoveCar" target="_blank" rel="noopener">GitHub: skyjt/MoveCar</a>'
+        '<div class="muted">'
+        '🚗 文明挪车 · 守护隐私 <span class="sep">|</span> '
+        '<a class="link" href="https://github.com/skyjt/MoveCar" target="_blank" rel="noopener">GitHub: skyjt/MoveCar</a> '
+        '<span class="sep">|</span> <span>Made with ❤️</span>'
         "</div>"
     )
 
