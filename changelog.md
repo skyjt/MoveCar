@@ -33,3 +33,7 @@
 - 在“系统配置”中新增“页脚版权（支持 HTML）”字段，允许自定义任意 HTML 片段
 - 数据结构：为 `AppSetting` 增加 `footer_html` 字段，并在启动时自动迁移
 - 关键文件：`app/templates/base.html`, `app/templates/landing.html`, `app/templates/print.html`, `app/templates/dashboard.html`, `app/routes/pages.py`, `app/models.py`, `app/database.py`, `README.md`
+
+2025-08-30 docs: 更新 README（技术栈与说明）
+- 增加 Tech Stack 段落，微调功能与配置描述
+- 关键文件：`README.md`
