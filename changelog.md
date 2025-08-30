@@ -107,8 +107,3 @@
 - base 模板使用 `site_footer_html` 动态渲染（支持 HTML）
 - 默认页脚改为“🚗 文明挪车 · 守护隐私 | GitHub 链接 | Made with ❤️”
 - 关键文件：`app/templates/base.html`, `app/routes/pages.py`
-
-2025-08-30 style(ux): 开关拇指垂直居中与对比度提升
-- 改为 top:50% + translateY(-50%)，修复圆球上下不居中
-- 增强拇指边框与阴影，提升暗色背景下的可见性
-- 关键文件：`app/style.css`
