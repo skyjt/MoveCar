@@ -39,6 +39,29 @@ router = APIRouter()
 rate_limiter = RateLimiter()
 
 
+def _default_footer_html() -> str:
+    """默认页脚 HTML。
+
+    默认展示版权与项目链接，管理员可在“系统配置”中自定义（支持 HTML）。
+    """
+    return (
+        '<div class="muted">© Move Car · '
+        '<a class="link" href="https://github.com/skyjt/MoveCar" target="_blank" rel="noopener">GitHub: skyjt/MoveCar</a>'
+        "</div>"
+    )
+
+
+def _site_footer(db: Session) -> str:
+    """从数据库读取页脚 HTML，若为空则返回默认内容。"""
+    try:
+        setting = db.query(AppSetting).first()
+        if setting and setting.footer_html:
+            return setting.footer_html
+    except Exception:
+        pass
+    return _default_footer_html()
+
+
 def current_user(request: Request, db: Session) -> User | None:
     """从会话中解析当前登录用户。未登录返回 None。"""
     uid = request.session.get("user_id")
@@ -52,7 +75,10 @@ def login_page(request: Request, db: Session = Depends(get_db)):
     """登录页（GET）。"""
     setting = db.query(AppSetting).first()
     site_title = (setting.site_title if setting and setting.site_title else "Move Car 挪车码")
-    return templates.TemplateResponse("login.html", {"request": request, "error": None, "site_title": site_title})
+    return templates.TemplateResponse(
+        "login.html",
+        {"request": request, "error": None, "site_title": site_title, "site_footer_html": _site_footer(db)},
+    )
 
 
 @router.post("/login")
@@ -80,7 +106,13 @@ def home(request: Request, db: Session = Depends(get_db)):
     site_title = (setting.site_title if setting and setting.site_title else "Move Car 挪车码")
     return templates.TemplateResponse(
         "home.html",
-        {"request": request, "title": site_title, "header": site_title, "site_title": site_title},
+        {
+            "request": request,
+            "title": site_title,
+            "header": site_title,
+            "site_title": site_title,
+            "site_footer_html": _site_footer(db),
+        },
     )
 
 
@@ -112,6 +144,7 @@ def dashboard(request: Request, db: Session = Depends(get_db)):
             "messages": messages,
             "site_base_url": (setting.site_base_url if setting else ""),
             "site_title": site_title,
+            "site_footer_html": _site_footer(db),
             "saved": request.query_params.get("saved"),
         },
     )
@@ -125,7 +158,10 @@ def code_new(request: Request, db: Session = Depends(get_db)):
         return RedirectResponse(url="/login", status_code=status.HTTP_302_FOUND)
     setting = db.query(AppSetting).first()
     site_title = (setting.site_title if setting and setting.site_title else "Move Car 挪车码")
-    return templates.TemplateResponse("code_new.html", {"request": request, "site_title": site_title})
+    return templates.TemplateResponse(
+        "code_new.html",
+        {"request": request, "site_title": site_title, "site_footer_html": _site_footer(db)},
+    )
 
 
 @router.post("/codes")
@@ -195,6 +231,7 @@ def code_notify_page(request: Request, code_id: int, db: Session = Depends(get_d
             "test": request.query_params.get("test"),
             "test_msg": request.query_params.get("msg"),
             "site_title": site_title,
+            "site_footer_html": _site_footer(db),
         },
     )
 
@@ -274,7 +311,7 @@ def print_page(request: Request, public_code: str, db: Session = Depends(get_db)
     site_title = (setting.site_title if setting and setting.site_title else "Move Car 挪车码")
     return templates.TemplateResponse(
         "print.html",
-        {"request": request, "code": code, "url": url, "site_title": site_title},
+        {"request": request, "code": code, "url": url, "site_title": site_title, "site_footer_html": _site_footer(db)},
     )
 
 
@@ -312,6 +349,7 @@ def save_site_base_url(
     request: Request,
     site_base_url: str = Form(""),
     site_title: str = Form(""),
+    site_footer_html: str = Form(""),
     db: Session = Depends(get_db),
 ):
     """保存站点对外地址（用于二维码/打印展示）。"""
@@ -320,13 +358,15 @@ def save_site_base_url(
         return RedirectResponse(url="/login", status_code=status.HTTP_302_FOUND)
     val = (site_base_url or "").strip().rstrip("/")
     title = (site_title or "").strip()
+    footer = (site_footer_html or "").strip()
     setting = db.query(AppSetting).first()
     if not setting:
-        setting = AppSetting(site_base_url=val or None, site_title=title or None)
+        setting = AppSetting(site_base_url=val or None, site_title=title or None, footer_html=footer or None)
         db.add(setting)
     else:
         setting.site_base_url = val or None
         setting.site_title = title or None
+        setting.footer_html = footer or None
     db.commit()
     return RedirectResponse(url="/dashboard?saved=1", status_code=status.HTTP_302_FOUND)
 
@@ -355,10 +395,28 @@ def landing(request: Request, public_code: str, db: Session = Depends(get_db)):
     if not code:
         setting = db.query(AppSetting).first()
         site_title = (setting.site_title if setting and setting.site_title else "Move Car 挪车码")
-        return templates.TemplateResponse("landing.html", {"request": request, "error": "Code not found or inactive", "code": None, "site_title": site_title})
+        return templates.TemplateResponse(
+            "landing.html",
+            {
+                "request": request,
+                "error": "Code not found or inactive",
+                "code": None,
+                "site_title": site_title,
+                "site_footer_html": _site_footer(db),
+            },
+        )
     setting = db.query(AppSetting).first()
     site_title = (setting.site_title if setting and setting.site_title else "Move Car 挪车码")
-    return templates.TemplateResponse("landing.html", {"request": request, "error": None, "code": code, "site_title": site_title})
+    return templates.TemplateResponse(
+        "landing.html",
+        {
+            "request": request,
+            "error": None,
+            "code": code,
+            "site_title": site_title,
+            "site_footer_html": _site_footer(db),
+        },
+    )
 
 
 @router.post("/c/{public_code}")

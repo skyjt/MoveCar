@@ -27,3 +27,9 @@
 2025-08-30 fix: 登录失败错误信息中文化
 - 将登录失败时的错误提示从英文改为中文“用户名或密码错误”，保持返回登录页的交互
 - 关键文件：`app/routes/pages.py`
+
+2025-08-30 feat: 页脚版权展示（可自定义 HTML）
+- 在所有主要页面增加页脚版权展示，默认包含项目 GitHub 链接
+- 在“系统配置”中新增“页脚版权（支持 HTML）”字段，允许自定义任意 HTML 片段
+- 数据结构：为 `AppSetting` 增加 `footer_html` 字段，并在启动时自动迁移
+- 关键文件：`app/templates/base.html`, `app/templates/landing.html`, `app/templates/print.html`, `app/templates/dashboard.html`, `app/routes/pages.py`, `app/models.py`, `app/database.py`, `README.md`

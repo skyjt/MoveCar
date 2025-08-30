@@ -115,13 +115,15 @@ def init_db():
             raise
     # Ensure admin exists (idempotent)
     bootstrap_admin()
-    # 轻量迁移：补充 app_setting.site_title 字段（若不存在）
+    # 轻量迁移：补充 app_setting.site_title / footer_html 字段（若不存在）
     try:
         with engine.begin() as conn:
             res = conn.execute(text("PRAGMA table_info('app_setting')")).fetchall()
             cols = {r[1] for r in res} if res else set()
             if "site_title" not in cols:
                 conn.execute(text("ALTER TABLE app_setting ADD COLUMN site_title VARCHAR(256) NULL"))
+            if "footer_html" not in cols:
+                conn.execute(text("ALTER TABLE app_setting ADD COLUMN footer_html TEXT NULL"))
     except Exception:
         # 忽略迁移错误以保证启动不中断
         pass

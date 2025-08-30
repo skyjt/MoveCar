@@ -119,4 +119,6 @@ class AppSetting(Base):
     id = Column(Integer, primary_key=True)
     site_base_url = Column(String(256), nullable=True)
     site_title = Column(String(256), nullable=True)
+    # 自定义页脚 HTML（可为空；为空时采用默认版权展示）
+    footer_html = Column(Text, nullable=True)
     updated_at = Column(DateTime, default=datetime.utcnow)

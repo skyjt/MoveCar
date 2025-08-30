@@ -36,4 +36,11 @@
     {% endif %}
   </div>
 </body>
+<footer class="footer" style="margin: 24px auto 16px; text-align:center; color:#6b7280;">
+  {% if site_footer_html %}
+    {{ site_footer_html | safe }}
+  {% else %}
+    <div class="muted">© Move Car · <a class="link" href="https://github.com/skyjt/MoveCar" target="_blank" rel="noopener">GitHub: skyjt/MoveCar</a></div>
+  {% endif %}
+</footer>
 </html>

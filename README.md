@@ -23,6 +23,7 @@ An open-source, self-hosted “move my car” QR code tool. It lets visitors con
 - Review messages on the dashboard and mark “processed”.
 - Optional push notification per code via Bark.
 - Built-in rate limiting and per-code blacklist to reduce abuse.
+- Custom footer: set a site-wide HTML footer in Dashboard → System Settings (defaults to a GitHub link).
 
 ## Notifications (Bark)
 - Per-code settings: Dashboard → target code → “Notification”.
@@ -44,6 +45,7 @@ An open-source, self-hosted “move my car” QR code tool. It lets visitors con
 - `RATE_LIMIT_WINDOW` / `RATE_LIMIT_COUNT`: Rate limit window and quota (default 60s / 1).
 - `ANON_CHAT_ENABLED`: Whether to enable real-time chat (MVP uses simple message, default false).
 - `ADMIN_USERNAME` / `ADMIN_PASSWORD`: Default admin bootstrap.
+- Footer: Configure in Dashboard → System Settings; supports raw HTML (stored in DB), with a sensible default linking to this repo.
 
 Notes:
 - SQLite DB is stored under `data/` and images under `data/uploads/`.
