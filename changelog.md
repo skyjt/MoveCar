@@ -23,3 +23,7 @@
 - Auto-load `.env` on startup (via `python-dotenv`), and added a fallback minimal parser when the package is missing, so local runs pick up config without manual export
 - Updated `requirements.txt` and README local env guidance
 - Key files: `app/database.py`, `requirements.txt`, `README.md`
+
+2025-08-30 fix: 登录失败错误信息中文化
+- 将登录失败时的错误提示从英文改为中文“用户名或密码错误”，保持返回登录页的交互
+- 关键文件：`app/routes/pages.py`

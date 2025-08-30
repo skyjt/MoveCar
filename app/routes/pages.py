@@ -57,10 +57,18 @@ def login_page(request: Request, db: Session = Depends(get_db)):
 
 @router.post("/login")
 def login(request: Request, db: Session = Depends(get_db), username: str = Form(...), password: str = Form(...)):
-    """登录（POST）。校验用户名/密码，通过后写入 session。"""
+    """登录（POST）。校验用户名/密码，通过后写入 session。
+
+    规范：当凭证错误时，返回登录页并以中文提示“用户名或密码错误”。
+    """
     user = db.query(User).filter(User.username == username).first()
     if not user or not verify_password(password, user.password_hash):
-        return templates.TemplateResponse("login.html", {"request": request, "error": "Invalid credentials"}, status_code=400)
+        # 使用中文规范化的错误信息，便于用户理解
+        return templates.TemplateResponse(
+            "login.html",
+            {"request": request, "error": "用户名或密码错误"},
+            status_code=400,
+        )
     request.session["user_id"] = user.id
     return RedirectResponse(url="/dashboard", status_code=status.HTTP_302_FOUND)
 
