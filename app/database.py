@@ -12,14 +12,51 @@
 """
 
 import os
-try:
-    # 优先在模块导入时加载 .env，使得后续读取的环境变量可生效（不覆盖已有环境变量）
-    from dotenv import load_dotenv  # type: ignore
+from pathlib import Path
 
-    load_dotenv(override=False)
-except Exception:
-    # 未安装 python-dotenv 或其他异常时忽略，保持向后兼容
-    pass
+def _load_env():
+    """加载 .env 文件。
+
+    优先使用 python-dotenv；若未安装，则采用简易解析器作为降级方案。
+    降级方案仅在环境变量未设置时填充，避免覆盖显式导出的变量。
+    """
+    # 计算仓库根目录（app/ 的父目录）
+    try:
+        repo_root = Path(__file__).resolve().parents[1]
+    except Exception:
+        repo_root = Path.cwd()
+    env_path = repo_root / ".env"
+
+    # 尝试使用 python-dotenv（若可用）
+    try:
+        from dotenv import load_dotenv  # type: ignore
+
+        # 为了不意外覆盖显式导出的系统变量，这里保持 override=False
+        load_dotenv(dotenv_path=str(env_path), override=False)
+        return
+    except Exception:
+        pass
+
+    # 简易降级：仅当键不存在于环境变量时才从 .env 填充
+    if env_path.exists():
+        try:
+            for line in env_path.read_text(encoding="utf-8").splitlines():
+                line = line.strip()
+                if not line or line.startswith("#"):
+                    continue
+                if "=" not in line:
+                    continue
+                k, v = line.split("=", 1)
+                k, v = k.strip(), v.strip()
+                if k and (k not in os.environ):
+                    os.environ[k] = v
+        except Exception:
+            # 忽略降级读取中的异常，保证应用可继续运行
+            pass
+
+
+# 模块导入即加载 .env（若存在）
+_load_env()
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 from sqlalchemy.exc import OperationalError

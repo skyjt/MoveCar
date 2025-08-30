@@ -20,6 +20,6 @@
 
 2025-08-30 fix: apply .env admin password changes; auto-load .env
 - `bootstrap_admin` now updates existing admin password when `ADMIN_PASSWORD` changes in `.env`/env
-- Auto-load `.env` on startup (via `python-dotenv`) so local runs pick up config without manual export
+- Auto-load `.env` on startup (via `python-dotenv`), and added a fallback minimal parser when the package is missing, so local runs pick up config without manual export
 - Updated `requirements.txt` and README local env guidance
 - Key files: `app/database.py`, `requirements.txt`, `README.md`
