@@ -4,6 +4,11 @@
 
 English version: [README.md](README.md)
 
+## 技术栈
+- Python（FastAPI）
+- HTML（Jinja2 模板）
+- Codex CLI（https://github.com/openai/codex）
+
 ## 快速开始
 - Docker（推荐）
   - 复制配置：`cp .env.example .env`
@@ -12,9 +17,17 @@ English version: [README.md](README.md)
 - 本地开发（不使用 Docker）
   - 创建虚拟环境：`python -m venv .venv && source .venv/bin/activate`
   - 安装依赖：`pip install -r requirements.txt`
-  - 可选导入环境：`cp .env.example .env && export $(grep -v '^#' .env | xargs)`
-  - 启动开发服务：`uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload`
+  - 准备环境文件：`cp .env.example .env`（应用会通过 python-dotenv 自动加载 `.env`）
+  - 启动开发服务：`uvicorn app.main:app --reload --host 127.0.0.1 --port 8000`
   - 打开：`http://127.0.0.1:8000/login`
+
+## 你可以做什么
+- 创建与管理多个挪车码（启用/停用/删除、展示名）。
+- 为每个挪车码打印或下载二维码 PNG。
+- 访客扫码访问 `/c/{public_code}` 留言（文本 + 可选 1 张图片 ≤ 5MB）。
+- 在仪表盘查看留言并标记“已处理”。
+- 可为单个挪车码配置轻量通知（Bark）。
+- 内置限流与按码黑名单，减少滥用。
 
 ## 基本使用
 1) 登录后台 → 进入“仪表盘”。
@@ -64,12 +77,20 @@ English version: [README.md](README.md)
   - 直接二维码：`/qr/{public_code}.png?scale=10&border=2`
   - 通知设置页：`/codes/{id}/notify`
 
+## 打包
+- 生成可分发归档：`./scripts/package.sh`
+  - 默认产物：`dist/MoveCar-<timestamp>-<rev>.tar.gz`
+  - 指定版本：`./scripts/package.sh v1.0.0`（或 `PKG_VERSION=v1.0.0 ./scripts/package.sh`）
+  - 已排除如 `.git`、`.venv`、`__pycache__`、`data/`、`app/uploads/`、`tests/`、`docs/` 等仅本地或构建时需要的目录，以减小运行时体积。
+
 ## 文档与计划
 - 需求：`docs/PRD.md`
 - 设计：`docs/DESIGN.md`
 - 规划：通知适配器（Email/Telegram/NTFY）、家庭共享同一码、一次性码/有效期、国际化、PWA、可选 WebRTC 语音。
 
-## 部署与安全建议
-- 生产建议开启 HTTPS（Caddy/Nginx 反代）。
-- 修改 `APP_SECRET` 与默认管理员密码，持久化 `data/` 目录（数据库与图片）。
-- Bark 推送异常请检查基础 URL、Token 与网络连通性，并查看返回的 HTTP 状态码与内容。
+## 提示与排错
+- “attempt to write a readonly database”：请确保工作目录可写，或设置 `DB_URL=sqlite:///./data/dev.db`。
+- 首次运行会自动创建 `data/` 与 `data/uploads/` 目录。
+- 二维码生成使用 `segno`，PNG 写入由 `pypng` 完成。
+- 生产部署：开启 HTTPS（Caddy/Nginx 反代）、替换 `APP_SECRET` 与默认管理员密码，并持久化 `data/` 目录。
+- Bark 问题：检查基础 URL 可达性、Token 是否正确、外网连通性，以及返回的 HTTP 状态码/内容。

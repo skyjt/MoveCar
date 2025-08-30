@@ -1,6 +1,7 @@
-2025-08-29
-- feat: initialize repository and initial import (local)
-- chore: add .gitignore to exclude venv/data/env files
+2025-08-30
+- docs: 同步中文 README 与英文文档
+  - 增加 技术栈/你可以做什么/打包/提示与排错 等章节，统一配置与路由说明
+  - 关键文件：`readme_zh.md`
 
 2025-08-29
 - docs: add English README as default (README.md)
