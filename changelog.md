@@ -91,3 +91,8 @@
 2025-08-30 chore(security): 从仓库移除本地 `.env`（已在 .gitignore）
 - 防止误提交敏感信息，后续请基于 `.env.example` 配置
 - 关键：本次仅移除工作区文件，不影响历史提交记录
+
+2025-08-30 feat(ux): 开关“启用/暂停”支持局部刷新（AJAX）
+- 新增 API：`POST /api/v1/codes/{id}/toggle` 返回 JSON 状态
+- 仪表盘开关改为使用 fetch 局部更新，保留无 JS 的表单回退
+- 关键文件：`app/routes/api.py`, `app/templates/dashboard.html`

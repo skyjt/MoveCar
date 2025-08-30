@@ -30,6 +30,7 @@ Notes
 - Printable QR and direct PNG (`/qr/{public_code}.png?scale=10&border=2`)
 - Landing page `/c/{public_code}` for anonymous messages (text + 1 image ≤ 5 MB)
 - Dashboard with latest messages; mark as processed
+- Snappy status toggle (activate/pause) via AJAX; graceful no‑JS fallback
 - Optional Bark push per code
 - Rate limiting + per‑code blacklist
 

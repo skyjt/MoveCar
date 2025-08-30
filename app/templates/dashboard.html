@@ -9,17 +9,17 @@
     {% for c in codes %}
       <tr>
         <td>{{ c.display_name or '-' }}</td>
-        <td>
-          {# 状态用 iOS 风格滑块开关；切换即提交到 /codes/{id}/toggle #}
-          <form action="/codes/{{ c.id }}/toggle" method="post" class="inline">
+        <td data-code-row="{{ c.id }}">
+          {# 渐进增强：默认提供表单回退；有 JS 时改用 AJAX 局部更新 #}
+          <form action="/codes/{{ c.id }}/toggle" method="post" class="inline js-toggle-form">
             <label class="switch" title="点击切换启用状态">
-              <input class="switch__input" role="switch" aria-checked="{{ 'true' if c.status == 'ACTIVE' else 'false' }}" type="checkbox" name="enabled" {% if c.status == 'ACTIVE' %}checked{% endif %} onchange="this.form.submit()">
+              <input class="switch__input" data-code-id="{{ c.id }}" role="switch" aria-checked="{{ 'true' if c.status == 'ACTIVE' else 'false' }}" type="checkbox" name="enabled" {% if c.status == 'ACTIVE' %}checked{% endif %}>
               <span class="switch__track"><span class="switch__thumb"></span></span>
             </label>
             {% if c.status == 'ACTIVE' %}
-              <span class="status status--ok"><strong>生效</strong></span>
+              <span class="status status--ok status-label"><strong>生效</strong></span>
             {% else %}
-              <span class="status status--bad"><strong>失效</strong></span>
+              <span class="status status--bad status-label"><strong>失效</strong></span>
             {% endif %}
             <button type="submit" style="display:none">提交</button>
           </form>
@@ -70,17 +70,17 @@
     {% for c in codes %}
       <div class="code-card">
         <div class="code-card__title">{{ c.display_name or '-' }}</div>
-        <div class="code-card__row">
+        <div class="code-card__row" data-code-row="{{ c.id }}">
           <span class="label">状态</span>
-          <form action="/codes/{{ c.id }}/toggle" method="post" class="inline">
+          <form action="/codes/{{ c.id }}/toggle" method="post" class="inline js-toggle-form">
             <label class="switch" title="点击切换启用状态">
-              <input class="switch__input" role="switch" aria-checked="{{ 'true' if c.status == 'ACTIVE' else 'false' }}" type="checkbox" name="enabled" {% if c.status == 'ACTIVE' %}checked{% endif %} onchange="this.form.submit()">
+              <input class="switch__input" data-code-id="{{ c.id }}" role="switch" aria-checked="{{ 'true' if c.status == 'ACTIVE' else 'false' }}" type="checkbox" name="enabled" {% if c.status == 'ACTIVE' %}checked{% endif %}>
               <span class="switch__track"><span class="switch__thumb"></span></span>
             </label>
             {% if c.status == 'ACTIVE' %}
-              <span class="status status--ok"><strong>生效</strong></span>
+              <span class="status status--ok status-label"><strong>生效</strong></span>
             {% else %}
-              <span class="status status--bad"><strong>失效</strong></span>
+              <span class="status status--bad status-label"><strong>失效</strong></span>
             {% endif %}
             <button type="submit" style="display:none">提交</button>
           </form>
@@ -163,6 +163,50 @@ function autofillBase(){
   if (!el) return;
   try { el.value = window.location.origin; } catch(e){}
 }
+
+// 局部刷新：开关状态使用 AJAX 切换，避免整页刷新
+document.addEventListener('DOMContentLoaded', function(){
+  var forms = document.querySelectorAll('form.js-toggle-form');
+  forms.forEach(function(f){
+    // 阻止回车等默认提交（依赖 JS 时走 fetch）
+    f.addEventListener('submit', function(ev){ ev.preventDefault(); });
+  });
+  var inputs = document.querySelectorAll('input.switch__input[data-code-id]');
+  inputs.forEach(function(input){
+    input.addEventListener('change', async function(ev){
+      var el = ev.currentTarget;
+      var codeId = el.getAttribute('data-code-id');
+      if (!codeId) return;
+      // 禁用交互并标记加载态
+      el.disabled = true;
+      try {
+        const res = await fetch('/api/v1/codes/' + codeId + '/toggle', { method: 'POST' });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        // 根据返回状态矫正 UI（防“竞态”导致的不同步）
+        var active = data.status === 'ACTIVE';
+        el.checked = active;
+        el.setAttribute('aria-checked', active ? 'true' : 'false');
+        // 更新同容器内的状态徽标
+        var container = el.closest('[data-code-row]') || document.querySelector('[data-code-row="' + codeId + '"]');
+        if (container) {
+          var label = container.querySelector('.status-label');
+          if (label) {
+            label.classList.remove('status--ok','status--bad');
+            label.classList.add(active ? 'status--ok' : 'status--bad');
+            label.innerHTML = active ? '<strong>生效</strong>' : '<strong>失效</strong>';
+          }
+        }
+      } catch (e) {
+        // 请求失败：恢复原状并提示
+        el.checked = !el.checked;
+        alert('切换失败，请稍后重试');
+      } finally {
+        el.disabled = false;
+      }
+    });
+  });
+});
 </script>
 
 <div class="card">

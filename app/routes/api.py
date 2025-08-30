@@ -41,3 +41,25 @@ def add_blocklist(
     db.add(bl)
     db.commit()
     return {"ok": True}
+
+
+@router.post("/codes/{code_id}/toggle")
+def api_toggle_code(
+    request: Request,
+    code_id: int,
+    db: Session = Depends(get_db),
+):
+    """切换挪车码状态（AJAX）。
+
+    返回 JSON：{"ok": true, "code_id": id, "status": "ACTIVE"|"PAUSED"}
+    仅允许已登录用户且需为该码的所有者。
+    """
+    user = current_user(request, db)
+    if not user:
+        raise HTTPException(status_code=401)
+    code = db.query(Code).filter(Code.id == code_id, Code.owner_id == user.id).first()
+    if not code:
+        raise HTTPException(status_code=404, detail="Code not found")
+    code.status = "PAUSED" if code.status == "ACTIVE" else "ACTIVE"
+    db.commit()
+    return {"ok": True, "code_id": code.id, "status": code.status}
