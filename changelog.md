@@ -8,4 +8,7 @@
 - docs: reflect latest routes, Docker flow, and config
 
 2025-08-29
+- chore: add remote for GitHub repo skyjt/Move_My_Car; push pending auth
+
+2025-08-29
 - docs: link Chinese README from main README; add backlink
