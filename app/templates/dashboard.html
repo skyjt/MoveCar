@@ -2,6 +2,7 @@
 {% block content %}
 <div class="card">
   <h2>我的挪车码</h2>
+  <div class="codes-desktop">
   <table>
     <thead><tr><th>名称</th><th>状态</th><th>创建时间</th><th>操作</th><th>链接</th></tr></thead>
     <tbody>
@@ -39,6 +40,47 @@
     {% endfor %}
     </tbody>
   </table>
+  </div>
+
+  {# 移动端分块展示：名称（标题）/ 状态 / 时间 / 操作 / 链接 #}
+  <div class="codes-mobile">
+    {% for c in codes %}
+      <div class="code-card">
+        <div class="code-card__title">{{ c.display_name or '-' }}</div>
+        <div class="code-card__row">
+          <span class="label">状态</span>
+          <form action="/codes/{{ c.id }}/toggle" method="post" class="inline">
+            <label class="switch" title="点击切换启用状态">
+              <input class="switch__input" role="switch" aria-checked="{{ 'true' if c.status == 'ACTIVE' else 'false' }}" type="checkbox" name="enabled" {% if c.status == 'ACTIVE' %}checked{% endif %} onchange="this.form.submit()">
+              <span class="switch__track"><span class="switch__thumb"></span></span>
+            </label>
+            {% if c.status == 'ACTIVE' %}
+              <span class="status status--ok"><strong>生效</strong></span>
+            {% else %}
+              <span class="status status--bad"><strong>失效</strong></span>
+            {% endif %}
+            <button type="submit" style="display:none">提交</button>
+          </form>
+        </div>
+        <div class="code-card__row">
+          <span class="label">创建时间</span>
+          <span class="muted">{{ c.created_at|fmt_dt }}</span>
+        </div>
+        <div class="code-card__row actions">
+          <a class="btn" href="/print/{{ c.public_code }}" target="_blank">打印 / 下载二维码</a>
+          <a class="btn btn--ghost" href="/codes/{{ c.id }}/notify">通知设置</a>
+          <form action="/codes/{{ c.id }}/delete" method="post" class="inline" onsubmit="return confirm('确定删除该挪车码？相关留言将一并删除。');"><button class="btn btn--ghost" type="submit">删除</button></form>
+        </div>
+        <div class="code-card__row">
+          <span class="label">链接</span>
+          <code>/c/{{ c.public_code }}</code>
+          <span class="muted" style="display:none" data-id="{{ c.id }}" data-public="{{ c.public_code }}"></span>
+        </div>
+      </div>
+    {% else %}
+      <div class="muted">暂无挪车码，去“新建挪车码”创建一个。</div>
+    {% endfor %}
+  </div>
 </div>
 
 <!-- 将系统配置卡片改为与其他卡片同宽，移除窄版样式，统一视觉宽度 -->

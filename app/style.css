@@ -118,6 +118,14 @@ code { background: var(--code-bg); border:1px solid var(--border); color: var(--
   .topbar__nav .link { padding: 6px 8px; }
   .card { padding: 14px; }
   input, textarea { font-size: 16px; }
+  /* 桌面表格在移动端隐藏，改用分块列表 */
+  .codes-desktop { display: none; }
+  .codes-mobile { display: block; }
+  .code-card { border: 1px solid var(--border); border-radius: 12px; padding: 12px; margin: 10px 0; background: transparent; }
+  .code-card__title { font-weight: 700; letter-spacing: .2px; margin-bottom: 4px; }
+  .code-card__row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 6px 0; }
+  .code-card__row .label { color: var(--muted); min-width: 64px; }
+  .code-card .actions { display: flex; gap: 8px; flex-wrap: wrap; }
 }
 
 /* Light mode overrides - follow system setting */
