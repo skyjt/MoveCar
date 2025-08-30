@@ -14,9 +14,8 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
 
-from .database import init_db, SessionLocal
-from .models import User
-from .utils import ensure_dirs, hash_password
+from .database import init_db
+from .utils import ensure_dirs
 from .routes import pages as pages_routes
 from .routes import api as api_routes
 

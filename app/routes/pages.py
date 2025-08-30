@@ -13,7 +13,7 @@ from starlette import status
 
 from ..database import get_db
 from ..models import User, Code, Message, Blacklist, CodeNotifyPref, AppSetting
-from ..utils import verify_password, hash_password, ensure_dirs, generate_public_code, hash_ip
+from ..utils import verify_password, ensure_dirs, generate_public_code, hash_ip
 from ..services.rate_limit import RateLimiter
 from ..services.notify import send_bark, allow_notify
 import io
@@ -24,12 +24,20 @@ templates = Jinja2Templates(directory="app/templates")
 
 
 def _fmt_dt(value):
-    """Jinja 过滤器：格式化日期时间为用户友好的样式（无毫秒）。"""
+    """Jinja 过滤器：格式化日期时间为用户友好的样式（无毫秒），转换为本地时区。"""
     try:
         if not value:
             return ""
+        # 若为“天真时间”（无 tzinfo），假设为 UTC，转换为本地时区后格式化
+        if value.tzinfo is None:
+            from datetime import timezone
+
+            utc_time = value.replace(tzinfo=timezone.utc)
+            local_time = utc_time.astimezone()
+            return local_time.strftime("%Y-%m-%d %H:%M")
         return value.strftime("%Y-%m-%d %H:%M")
     except Exception:
+        # 兜底：如遇到未知类型，直接转为字符串
         return str(value)
 
 
@@ -76,8 +84,9 @@ def login_page(request: Request, db: Session = Depends(get_db)):
     setting = db.query(AppSetting).first()
     site_title = (setting.site_title if setting and setting.site_title else "Move Car 挪车码")
     return templates.TemplateResponse(
+        request,
         "login.html",
-        {"request": request, "error": None, "site_title": site_title, "site_footer_html": _site_footer(db)},
+        {"session": request.session, "error": None, "site_title": site_title, "site_footer_html": _site_footer(db)},
     )
 
 
@@ -91,8 +100,9 @@ def login(request: Request, db: Session = Depends(get_db), username: str = Form(
     if not user or not verify_password(password, user.password_hash):
         # 使用中文规范化的错误信息，便于用户理解
         return templates.TemplateResponse(
+            request,
             "login.html",
-            {"request": request, "error": "用户名或密码错误"},
+            {"session": request.session, "error": "用户名或密码错误"},
             status_code=400,
         )
     request.session["user_id"] = user.id
@@ -105,9 +115,10 @@ def home(request: Request, db: Session = Depends(get_db)):
     setting = db.query(AppSetting).first()
     site_title = (setting.site_title if setting and setting.site_title else "Move Car 挪车码")
     return templates.TemplateResponse(
+        request,
         "home.html",
         {
-            "request": request,
+            "session": request.session,
             "title": site_title,
             "header": site_title,
             "site_title": site_title,
@@ -136,9 +147,10 @@ def dashboard(request: Request, db: Session = Depends(get_db)):
     setting = db.query(AppSetting).first()
     site_title = (setting.site_title if setting and setting.site_title else "Move Car 挪车码")
     return templates.TemplateResponse(
+        request,
         "dashboard.html",
         {
-            "request": request,
+            "session": request.session,
             "user": user,
             "codes": codes,
             "messages": messages,
@@ -159,8 +171,9 @@ def code_new(request: Request, db: Session = Depends(get_db)):
     setting = db.query(AppSetting).first()
     site_title = (setting.site_title if setting and setting.site_title else "Move Car 挪车码")
     return templates.TemplateResponse(
+        request,
         "code_new.html",
-        {"request": request, "site_title": site_title, "site_footer_html": _site_footer(db)},
+        {"session": request.session, "site_title": site_title, "site_footer_html": _site_footer(db)},
     )
 
 
@@ -220,9 +233,10 @@ def code_notify_page(request: Request, code_id: int, db: Session = Depends(get_d
     setting = db.query(AppSetting).first()
     site_title = (setting.site_title if setting and setting.site_title else "Move Car 挪车码")
     return templates.TemplateResponse(
+        request,
         "notify.html",
         {
-            "request": request,
+            "session": request.session,
             "code": code,
             "channel": pref.channel if pref else "NONE",
             "bark_base_url": pref.bark_base_url if pref else "https://api.day.app",
@@ -310,8 +324,9 @@ def print_page(request: Request, public_code: str, db: Session = Depends(get_db)
     setting = db.query(AppSetting).first()
     site_title = (setting.site_title if setting and setting.site_title else "Move Car 挪车码")
     return templates.TemplateResponse(
+        request,
         "print.html",
-        {"request": request, "code": code, "url": url, "site_title": site_title, "site_footer_html": _site_footer(db)},
+        {"session": request.session, "code": code, "url": url, "site_title": site_title, "site_footer_html": _site_footer(db)},
     )
 
 
@@ -396,9 +411,10 @@ def landing(request: Request, public_code: str, db: Session = Depends(get_db)):
         setting = db.query(AppSetting).first()
         site_title = (setting.site_title if setting and setting.site_title else "Move Car 挪车码")
         return templates.TemplateResponse(
+            request,
             "landing.html",
             {
-                "request": request,
+                "session": request.session,
                 "error": "Code not found or inactive",
                 "code": None,
                 "site_title": site_title,
@@ -408,9 +424,10 @@ def landing(request: Request, public_code: str, db: Session = Depends(get_db)):
     setting = db.query(AppSetting).first()
     site_title = (setting.site_title if setting and setting.site_title else "Move Car 挪车码")
     return templates.TemplateResponse(
+        request,
         "landing.html",
         {
-            "request": request,
+            "session": request.session,
             "error": None,
             "code": code,
             "site_title": site_title,
@@ -448,7 +465,6 @@ def submit_message(
         if content_type not in ("image/jpeg", "image/png", "image/webp"):
             raise HTTPException(status_code=400, detail="Unsupported image type")
         data_dir, uploads_dir = ensure_dirs()
-        from datetime import datetime
         import secrets
 
         fname = f"{code.id}_{secrets.token_hex(8)}"
