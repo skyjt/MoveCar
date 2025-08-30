@@ -7,7 +7,7 @@ An open-source, self-hosted “move my car” QR code tool. It lets visitors con
 ## Tech Stack
 - python
 - html
-- **codex cli**
+- **codex cli**（https://github.com/openai/codex）
 
 ## Quick Start
 - Docker (recommended)
@@ -75,7 +75,8 @@ Notes:
 
 ## Packaging
 - Create a distributable archive: `./scripts/package.sh`
-  - Produces `dist/MoveCar-<timestamp>-<rev>.tar.gz`
+  - Default: `dist/MoveCar-<timestamp>-<rev>.tar.gz`
+  - With version: `./scripts/package.sh v1.0.0` (or `PKG_VERSION=v1.0.0 ./scripts/package.sh`)
   - Excludes local-only files like `.git`, `.venv`, `__pycache__`, `data/`, `app/uploads/`, `tests/`, and `docs/` for smaller runtime delivery.
 
 ## Docs & Roadmap

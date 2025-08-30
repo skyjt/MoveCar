@@ -2,16 +2,29 @@
 set -euo pipefail
 
 # 打包脚本（生成可分发压缩包）
+# 使用方式：
+#   1) 默认：./scripts/package.sh
+#      产物：dist/MoveCar-<YYYYMMDD-HHMMSS>-<gitrev>.tar.gz
+#   2) 指定版本：./scripts/package.sh v1.0.0  或  PKG_VERSION=v1.0.0 ./scripts/package.sh
+#      产物：dist/MoveCar-v1.0.0.tar.gz
 # 说明：
-# - 默认输出 tar.gz 到 dist/ 目录，文件名包含 git 简短提交号与时间戳；
+# - 默认输出 tar.gz 到 dist/ 目录；
 # - 自动排除 .git/.venv/__pycache__/data/uploads/tests/docs 等仅本地或非运行时必需内容；
 # - 用于发布 Release 前的快速打包。
 
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 DIST_DIR="$ROOT_DIR/dist"
+
+# 解析版本名（优先参数，其次环境变量）
+VERSION="${1:-${PKG_VERSION:-}}"
 TS="$(date +%Y%m%d-%H%M%S)"
 REV="$(git -C "$ROOT_DIR" rev-parse --short HEAD 2>/dev/null || echo unknown)"
-NAME="MoveCar-$TS-$REV"
+
+if [[ -n "$VERSION" ]]; then
+  NAME="MoveCar-$VERSION"
+else
+  NAME="MoveCar-$TS-$REV"
+fi
 
 mkdir -p "$DIST_DIR"
 
@@ -42,4 +55,3 @@ ARCHIVE="$DIST_DIR/$NAME.tar.gz"
 tar -C "$(dirname "$PKG_DIR")" -czf "$ARCHIVE" "$NAME"
 
 echo "打包完成: $ARCHIVE"
-

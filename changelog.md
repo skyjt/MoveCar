@@ -41,3 +41,8 @@
 - 打上 `v1.0.0` 标签并推送至 GitHub（初始稳定版）
 - 亮点：挪车码管理、匿名留言（文本+图片）、打印与二维码、Bark 通知、频控与黑名单、可自定义页脚、.env 自动加载与管理员密码变更自动生效
 - 关键：请在 GitHub Release 页面从标签创建 Release 并可附上打包产物（dist/*）
+
+2025-08-30 build: 打包脚本支持版本号参数
+- `scripts/package.sh vX.Y.Z` 生成 `MoveCar-vX.Y.Z.tar.gz`
+- 保留默认 `<timestamp>-<rev>` 命名
+- 文档：README Packaging 使用说明已更新
