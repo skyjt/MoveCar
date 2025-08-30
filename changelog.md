@@ -12,3 +12,8 @@
 
 2025-08-29
 - docs: link Chinese README from main README; add backlink
+2025-08-30 docs: add packaging script and .dockerignore; update README
+- Added `scripts/package.sh` to generate tar.gz for releases (excludes local-only files)
+- Added `.dockerignore` to keep Docker contexts small
+- Updated `README.md` with Packaging instructions
+- Key files: `scripts/package.sh`, `.dockerignore`, `README.md`

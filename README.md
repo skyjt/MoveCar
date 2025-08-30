@@ -68,6 +68,11 @@ Notes:
   - QR PNG: `/qr/{public_code}.png?scale=10&border=2`
   - Per-code notification page: `/codes/{id}/notify`
 
+## Packaging
+- Create a distributable archive: `./scripts/package.sh`
+  - Produces `dist/MoveCar-<timestamp>-<rev>.tar.gz`
+  - Excludes local-only files like `.git`, `.venv`, `__pycache__`, `data/`, `app/uploads/`, `tests/`, and `docs/` for smaller runtime delivery.
+
 ## Docs & Roadmap
 - Product: `docs/PRD.md`
 - Design: `docs/DESIGN.md`

@@ -1,0 +1,27 @@
+# Exclude local-only files from Docker contexts
+.git
+.gitignore
+.venv
+__pycache__
+.pytest_cache
+.mypy_cache
+.DS_Store
+.vscode
+.idea
+
+# Local data and uploads (mounted as volumes in compose)
+data
+app/uploads
+
+# Tests and docs are not needed in runtime images
+tests
+docs
+
+# Python bytecode and build artifacts
+*.pyc
+*.pyo
+*.pyd
+*.so
+build
+dist
+*.egg-info
