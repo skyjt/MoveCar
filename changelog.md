@@ -96,3 +96,9 @@
 - 新增 API：`POST /api/v1/codes/{id}/toggle` 返回 JSON 状态
 - 仪表盘开关改为使用 fetch 局部更新，保留无 JS 的表单回退
 - 关键文件：`app/routes/api.py`, `app/templates/dashboard.html`
+
+2025-08-30 feat(ux): 仪表盘支持“删除挪车码”“标记处理”无刷新
+- 新增 API：`POST /api/v1/codes/{id}/delete`、`POST /api/v1/messages/{id}/mark`
+- 删除挪车码后立即移除桌面行/移动卡片，并移除关联留言行
+- 标记留言处理后，行内状态即时变更并隐藏操作按钮
+- 关键文件：`app/routes/api.py`, `app/templates/dashboard.html`

@@ -7,7 +7,7 @@
     <thead><tr><th>名称</th><th>状态</th><th>创建时间</th><th>操作</th><th>链接</th></tr></thead>
     <tbody>
     {% for c in codes %}
-      <tr>
+      <tr data-code-container="{{ c.id }}">
         <td>{{ c.display_name or '-' }}</td>
         <td data-code-row="{{ c.id }}">
           {# 渐进增强：默认提供表单回退；有 JS 时改用 AJAX 局部更新 #}
@@ -43,7 +43,7 @@
               </svg>
               通知设置
             </a>
-            <form action="/codes/{{ c.id }}/delete" method="post" class="inline" onsubmit="return confirm('确定删除该挪车码？相关留言将一并删除。');"><button class="btn btn--ghost btn--danger" type="submit">
+            <form action="/codes/{{ c.id }}/delete" method="post" class="inline js-delete-code" data-code-id="{{ c.id }}"><button class="btn btn--ghost btn--danger" type="submit">
               <svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="m3 6 3 0"/>
                 <path d="m19 6-1 0"/>
@@ -68,7 +68,7 @@
   {# 移动端分块展示：名称（标题）/ 状态 / 时间 / 操作 / 链接 #}
   <div class="codes-mobile">
     {% for c in codes %}
-      <div class="code-card">
+      <div class="code-card" data-code-container="{{ c.id }}">
         <div class="code-card__title">{{ c.display_name or '-' }}</div>
         <div class="code-card__row" data-code-row="{{ c.id }}">
           <span class="label">状态</span>
@@ -105,7 +105,7 @@
             </svg>
             通知设置
           </a>
-          <form action="/codes/{{ c.id }}/delete" method="post" class="inline" onsubmit="return confirm('确定删除该挪车码？相关留言将一并删除。');"><button class="btn btn--ghost btn--danger" type="submit">
+          <form action="/codes/{{ c.id }}/delete" method="post" class="inline js-delete-code" data-code-id="{{ c.id }}"><button class="btn btn--ghost btn--danger" type="submit">
             <svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="m3 6 3 0"/>
               <path d="m19 6-1 0"/>
@@ -206,6 +206,60 @@ document.addEventListener('DOMContentLoaded', function(){
       }
     });
   });
+
+  // 删除挪车码（AJAX，无刷新移除桌面与移动端卡片/行，并移除相关留言行）
+  var delForms = document.querySelectorAll('form.js-delete-code');
+  delForms.forEach(function(f){
+    // 移除行内 onsubmit 以避免双重 confirm（保留无 JS 回退时的 form 行为）
+    if (f.hasAttribute('onsubmit')) f.removeAttribute('onsubmit');
+    f.addEventListener('submit', async function(ev){
+      ev.preventDefault();
+      var codeId = f.getAttribute('data-code-id');
+      if (!codeId) {
+        // 回退提交
+        f.submit();
+        return;
+      }
+      if (!confirm('确定删除该挪车码？相关留言将一并删除。')) return;
+      try {
+        const res = await fetch('/api/v1/codes/' + codeId + '/delete', { method: 'POST' });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        // 移除桌面表格行与移动端卡片
+        document.querySelectorAll('[data-code-container="' + codeId + '"]').forEach(function(el){ el.remove(); });
+        // 移除与该码关联的留言行
+        document.querySelectorAll('[data-msg-row][data-code-id="' + codeId + '"]').forEach(function(el){ el.remove(); });
+      } catch (e) {
+        alert('删除失败，请稍后重试');
+      }
+    });
+  });
+
+  // 留言“标记处理”无刷新
+  var markForms = document.querySelectorAll('form.js-mark-form');
+  markForms.forEach(function(f){
+    f.addEventListener('submit', async function(ev){
+      ev.preventDefault();
+      var msgId = f.getAttribute('data-msg-id');
+      if (!msgId) { f.submit(); return; }
+      try {
+        const res = await fetch('/api/v1/messages/' + msgId + '/mark', { method: 'POST' });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        var row = f.closest('[data-msg-row]');
+        if (row) {
+          var label = row.querySelector('.status-label-msg');
+          if (label) {
+            label.classList.remove('status--bad');
+            label.classList.add('status--ok');
+            label.innerHTML = '<strong>已处理</strong>';
+          }
+          // 移除按钮表单
+          f.remove();
+        }
+      } catch (e) {
+        alert('操作失败，请稍后重试');
+      }
+    });
+  });
 });
 </script>
 
@@ -215,7 +269,7 @@ document.addEventListener('DOMContentLoaded', function(){
     <thead><tr><th>ID</th><th>码</th><th>内容</th><th>图片</th><th>时间</th><th>状态</th><th>操作</th></tr></thead>
     <tbody>
     {% for m in messages %}
-      <tr>
+      <tr data-msg-row="{{ m.id }}" data-code-id="{{ m.code_id }}">
         <td>{{ m.id }}</td>
         <td>{{ m.code.display_name or m.code.public_code }}</td>
         <td>{{ m.content_text or '-' }}</td>
@@ -232,14 +286,14 @@ document.addEventListener('DOMContentLoaded', function(){
         <td>
           {# 留言处理状态使用中文，并以颜色区分 #}
           {% if m.processed %}
-            <span class="status status--ok"><strong>已处理</strong></span>
+            <span class="status status--ok status-label-msg"><strong>已处理</strong></span>
           {% else %}
-            <span class="status status--bad"><strong>未处理</strong></span>
+            <span class="status status--bad status-label-msg"><strong>未处理</strong></span>
           {% endif %}
         </td>
         <td>
           {% if not m.processed %}
-          <form action="/messages/{{ m.id }}/mark" method="post" style="display:inline"><button class="btn btn--subtle" type="submit">
+          <form action="/messages/{{ m.id }}/mark" method="post" class="js-mark-form" data-msg-id="{{ m.id }}" style="display:inline"><button class="btn btn--subtle" type="submit">
             <svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M9 12l2 2 4-4"/>
               <circle cx="12" cy="12" r="10"/>
